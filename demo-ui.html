@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="wrigs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wrigs Fashion - UI Demo</title>
+
+    <!-- Tailwind CSS + DaisyUI via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.6.0/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Kid-friendly custom theme */
+        [data-theme="wrigs"] {
+            --rounded-box: 1.5rem;
+            --rounded-btn: 1rem;
+            --rounded-badge: 1rem;
+            --animation-btn: 0.25s;
+            --animation-input: 0.2s;
+            --btn-focus-scale: 0.95;
+            --border-btn: 2px;
+            --tab-border: 2px;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+        }
+
+        .sparkle {
+            animation: sparkle 1.5s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .btn-lg {
+            min-height: 3.5rem;
+            padding: 0 2rem;
+            font-size: 1.125rem;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            daisyui: {
+                themes: [
+                    {
+                        wrigs: {
+                            "primary": "#E879F9",      // Bright pink
+                            "secondary": "#A78BFA",    // Purple
+                            "accent": "#FDE047",       // Sunny yellow
+                            "neutral": "#3D4451",
+                            "base-100": "#FFFFFF",
+                            "info": "#60A5FA",         // Blue
+                            "success": "#4ADE80",      // Mint green
+                            "warning": "#FB923C",      // Orange
+                            "error": "#F87171",
+                        },
+                    },
+                ],
+            },
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-purple-100 to-yellow-100 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="navbar bg-white shadow-lg mb-8">
+        <div class="navbar-start">
+            <button class="btn btn-ghost text-xl">
+                <span class="text-primary">✨</span>
+                <span class="font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Wrigs Fashion
+                </span>
+            </button>
+        </div>
+        <div class="navbar-end">
+            <button class="btn btn-ghost btn-circle">
+                <div class="indicator">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span class="badge badge-xs badge-primary indicator-item"></span>
+                </div>
+            </button>
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                        M
+                    </div>
+                </label>
+                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-white rounded-box w-52">
+                    <li><a>My Portfolio</a></li>
+                    <li><a>My Circles</a></li>
+                    <li><a>Settings</a></li>
+                    <li><a>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-12">
+
+        <!-- Hero Section -->
+        <div class="hero bg-white rounded-3xl shadow-xl p-8 mb-8">
+            <div class="hero-content text-center">
+                <div class="max-w-2xl">
+                    <h1 class="text-5xl font-bold mb-4">
+                        <span class="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                            Draw. Digitize. Play!
+                        </span>
+                    </h1>
+                    <p class="text-xl mb-6 text-gray-600">
+                        Turn your fashion drawings into amazing paper dolls ✨
+                    </p>
+                    <button class="btn btn-primary btn-lg sparkle shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Start Creating
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs for different demo pages -->
+        <div class="tabs tabs-boxed bg-white shadow-lg mb-8 p-2" role="tablist">
+            <button class="tab tab-lg tab-active" onclick="showTab('home')">Home</button>
+            <button class="tab tab-lg" onclick="showTab('upload')">Upload</button>
+            <button class="tab tab-lg" onclick="showTab('color')">Color</button>
+            <button class="tab tab-lg" onclick="showTab('portfolio')">Portfolio</button>
+        </div>
+
+        <!-- Tab Content: Home -->
+        <div id="home" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Step 1 Card -->
+                <div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow">
+                    <figure class="px-10 pt-10">
+                        <div class="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-5xl">
+                            📷
+                        </div>
+                    </figure>
+                    <div class="card-body items-center text-center">
+                        <h2 class="card-title text-2xl text-primary">1. Upload</h2>
+                        <p class="text-gray-600">Take a photo of your fashion drawing</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 Card -->
+                <div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow">
+                    <figure class="px-10 pt-10">
+                        <div class="w-24 h-24 bg-gradient-to-br from-secondary to-accent rounded-full flex items-center justify-center text-5xl">
+                            🎨
+                        </div>
+                    </figure>
+                    <div class="card-body items-center text-center">
+                        <h2 class="card-title text-2xl text-secondary">2. Color It</h2>
+                        <p class="text-gray-600">Add colors and fun patterns</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 Card -->
+                <div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow">
+                    <figure class="px-10 pt-10">
+                        <div class="w-24 h-24 bg-gradient-to-br from-accent to-success rounded-full flex items-center justify-center text-5xl">
+                            🖨️
+                        </div>
+                    </figure>
+                    <div class="card-body items-center text-center">
+                        <h2 class="card-title text-2xl text-accent">3. Print & Play</h2>
+                        <p class="text-gray-600">Make your own paper doll!</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Recent Designs -->
+            <div class="mt-12">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Your Recent Designs ✨</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="card bg-white shadow-lg hover:scale-105 transition-transform cursor-pointer">
+                        <figure class="aspect-square bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center">
+                            <span class="text-6xl">👗</span>
+                        </figure>
+                        <div class="card-body p-4">
+                            <h3 class="font-bold">Summer Dress</h3>
+                            <p class="text-sm text-gray-500">2 days ago</p>
+                        </div>
+                    </div>
+
+                    <div class="card bg-white shadow-lg hover:scale-105 transition-transform cursor-pointer">
+                        <figure class="aspect-square bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center">
+                            <span class="text-6xl">👔</span>
+                        </figure>
+                        <div class="card-body p-4">
+                            <h3 class="font-bold">Cool Jacket</h3>
+                            <p class="text-sm text-gray-500">1 week ago</p>
+                        </div>
+                    </div>
+
+                    <div class="card bg-white shadow-lg hover:scale-105 transition-transform cursor-pointer">
+                        <figure class="aspect-square bg-gradient-to-br from-yellow-200 to-orange-200 flex items-center justify-center">
+                            <span class="text-6xl">👚</span>
+                        </figure>
+                        <div class="card-body p-4">
+                            <h3 class="font-bold">Sparkle Top</h3>
+                            <p class="text-sm text-gray-500">2 weeks ago</p>
+                        </div>
+                    </div>
+
+                    <div class="card bg-white shadow-lg hover:scale-105 transition-transform cursor-pointer border-4 border-dashed border-primary">
+                        <figure class="aspect-square flex items-center justify-center">
+                            <button class="btn btn-circle btn-lg btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                        </figure>
+                        <div class="card-body p-4">
+                            <h3 class="font-bold text-center">New Design</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Upload -->
+        <div id="upload" class="tab-content hidden">
+            <div class="max-w-2xl mx-auto">
+                <div class="card bg-white shadow-2xl">
+                    <div class="card-body">
+                        <h2 class="card-title text-3xl mb-6 justify-center">
+                            Upload Your Drawing 📸
+                        </h2>
+
+                        <!-- Upload Zone -->
+                        <div class="border-4 border-dashed border-primary rounded-3xl p-12 text-center hover:bg-primary/5 transition-colors cursor-pointer">
+                            <div class="mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2">Drop your drawing here!</h3>
+                            <p class="text-gray-500 mb-4">or click to browse</p>
+                            <button class="btn btn-primary btn-lg">
+                                Choose File
+                            </button>
+                            <p class="text-sm text-gray-400 mt-4">JPG, PNG or HEIC • Max 10MB</p>
+                        </div>
+
+                        <!-- Example Preview -->
+                        <div class="mt-8">
+                            <div class="alert alert-info">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>Take a clear photo with good lighting for best results!</span>
+                            </div>
+                        </div>
+
+                        <div class="card-actions justify-center mt-8">
+                            <button class="btn btn-outline btn-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Back
+                            </button>
+                            <button class="btn btn-primary btn-lg" disabled>
+                                Next
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Color -->
+        <div id="color" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Canvas Area -->
+                <div class="lg:col-span-2">
+                    <div class="card bg-white shadow-2xl">
+                        <div class="card-body">
+                            <h2 class="card-title text-2xl mb-4">Color Your Design 🎨</h2>
+
+                            <!-- Mock Canvas -->
+                            <div class="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center border-4 border-gray-300">
+                                <div class="text-center text-gray-400">
+                                    <p class="text-6xl mb-4">👗</p>
+                                    <p class="text-xl">Your drawing will appear here</p>
+                                    <p class="text-sm">Touch or click to color!</p>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-2 mt-4 flex-wrap justify-center">
+                                <button class="btn btn-outline">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                    </svg>
+                                    Undo
+                                </button>
+                                <button class="btn btn-outline">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+                                    </svg>
+                                    Redo
+                                </button>
+                                <button class="btn btn-outline">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Clear
+                                </button>
+                                <button class="btn btn-success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tools Panel -->
+                <div class="space-y-6">
+
+                    <!-- Color Picker -->
+                    <div class="card bg-white shadow-xl">
+                        <div class="card-body">
+                            <h3 class="card-title text-lg">Colors 🌈</h3>
+                            <div class="grid grid-cols-5 gap-2">
+                                <button class="btn btn-circle bg-red-500 hover:bg-red-600 border-4 border-white shadow-lg"></button>
+                                <button class="btn btn-circle bg-pink-500 hover:bg-pink-600 border-0"></button>
+                                <button class="btn btn-circle bg-purple-500 hover:bg-purple-600 border-0"></button>
+                                <button class="btn btn-circle bg-blue-500 hover:bg-blue-600 border-0"></button>
+                                <button class="btn btn-circle bg-cyan-500 hover:bg-cyan-600 border-0"></button>
+
+                                <button class="btn btn-circle bg-teal-500 hover:bg-teal-600 border-0"></button>
+                                <button class="btn btn-circle bg-green-500 hover:bg-green-600 border-0"></button>
+                                <button class="btn btn-circle bg-yellow-500 hover:bg-yellow-600 border-0"></button>
+                                <button class="btn btn-circle bg-orange-500 hover:bg-orange-600 border-0"></button>
+                                <button class="btn btn-circle bg-brown-500 hover:bg-brown-600 border-0"></button>
+
+                                <button class="btn btn-circle bg-gray-800 hover:bg-gray-900 border-0"></button>
+                                <button class="btn btn-circle bg-gray-500 hover:bg-gray-600 border-0"></button>
+                                <button class="btn btn-circle bg-white hover:bg-gray-100 border-2 border-gray-300"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tools -->
+                    <div class="card bg-white shadow-xl">
+                        <div class="card-body">
+                            <h3 class="card-title text-lg">Tools ✏️</h3>
+                            <div class="space-y-2">
+                                <button class="btn btn-block btn-lg justify-start btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                    Brush
+                                </button>
+                                <button class="btn btn-block btn-lg justify-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                    </svg>
+                                    Fill
+                                </button>
+                                <button class="btn btn-block btn-lg justify-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Eraser
+                                </button>
+                            </div>
+
+                            <!-- Brush Size -->
+                            <div class="mt-4">
+                                <label class="label">
+                                    <span class="label-text font-bold">Brush Size</span>
+                                </label>
+                                <input type="range" min="1" max="50" value="10" class="range range-primary" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Patterns -->
+                    <div class="card bg-white shadow-xl">
+                        <div class="card-body">
+                            <h3 class="card-title text-lg">Patterns ✨</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="btn btn-lg aspect-square" style="background: radial-gradient(circle, #ff69b4 20%, transparent 20%), radial-gradient(circle, #ff69b4 20%, transparent 20%); background-size: 30px 30px; background-position: 0 0, 15px 15px;">
+                                    Polka Dots
+                                </button>
+                                <button class="btn btn-lg aspect-square" style="background: repeating-linear-gradient(45deg, #4a90e2, #4a90e2 10px, #fff 10px, #fff 20px);">
+                                    Stripes
+                                </button>
+                                <button class="btn btn-lg aspect-square bg-gradient-to-br from-yellow-300 via-pink-300 to-purple-300">
+                                    Sparkle
+                                </button>
+                                <button class="btn btn-lg aspect-square" style="background: linear-gradient(135deg, #667eea 25%, transparent 25%), linear-gradient(225deg, #764ba2 25%, transparent 25%), linear-gradient(45deg, #667eea 25%, transparent 25%), linear-gradient(315deg, #764ba2 25%, #f9f9f9 25%); background-size: 20px 20px;">
+                                    Plaid
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Portfolio -->
+        <div id="portfolio" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-gray-800">My Portfolio 📁</h2>
+                <div class="flex gap-2">
+                    <button class="btn btn-outline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        Grid
+                    </button>
+                    <button class="btn btn-outline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        List
+                    </button>
+                </div>
+            </div>
+
+            <!-- Portfolio Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Design Card 1 -->
+                <div class="card bg-white shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+                    <figure class="aspect-square bg-gradient-to-br from-pink-200 to-rose-200 flex items-center justify-center">
+                        <span class="text-8xl">👗</span>
+                    </figure>
+                    <div class="card-body">
+                        <h3 class="card-title text-lg">Summer Dress</h3>
+                        <p class="text-sm text-gray-500">Created 2 days ago</p>
+                        <div class="card-actions justify-between items-center mt-2">
+                            <div class="flex gap-1">
+                                <span class="badge badge-primary">Dress</span>
+                            </div>
+                            <div class="dropdown dropdown-end">
+                                <label tabindex="0" class="btn btn-ghost btn-circle btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                    </svg>
+                                </label>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-white rounded-box w-52">
+                                    <li><a>Edit</a></li>
+                                    <li><a>Share to Circle</a></li>
+                                    <li><a>Make Paper Doll</a></li>
+                                    <li><a>Download</a></li>
+                                    <li><a class="text-error">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Design Card 2 -->
+                <div class="card bg-white shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+                    <figure class="aspect-square bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center">
+                        <span class="text-8xl">👔</span>
+                    </figure>
+                    <div class="card-body">
+                        <h3 class="card-title text-lg">Cool Jacket</h3>
+                        <p class="text-sm text-gray-500">Created 1 week ago</p>
+                        <div class="card-actions justify-between items-center mt-2">
+                            <div class="flex gap-1">
+                                <span class="badge badge-info">Jacket</span>
+                            </div>
+                            <button class="btn btn-ghost btn-circle btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Design Card 3 -->
+                <div class="card bg-white shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+                    <figure class="aspect-square bg-gradient-to-br from-yellow-200 to-orange-200 flex items-center justify-center">
+                        <span class="text-8xl">👚</span>
+                    </figure>
+                    <div class="card-body">
+                        <h3 class="card-title text-lg">Sparkle Top</h3>
+                        <p class="text-sm text-gray-500">Created 2 weeks ago</p>
+                        <div class="card-actions justify-between items-center mt-2">
+                            <div class="flex gap-1">
+                                <span class="badge badge-warning">Top</span>
+                            </div>
+                            <button class="btn btn-ghost btn-circle btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Design Card -->
+                <div class="card bg-white shadow-xl border-4 border-dashed border-primary hover:shadow-2xl transition-all hover:-translate-y-1 cursor-pointer">
+                    <figure class="aspect-square flex items-center justify-center">
+                        <div>
+                            <button class="btn btn-circle btn-lg btn-primary mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                            <p class="text-center font-bold text-gray-500">Create New</p>
+                        </div>
+                    </figure>
+                </div>
+
+            </div>
+
+            <!-- Stats -->
+            <div class="stats stats-vertical lg:stats-horizontal shadow-xl bg-white mt-12 w-full">
+                <div class="stat">
+                    <div class="stat-figure text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="stat-title">Total Designs</div>
+                    <div class="stat-value text-primary">12</div>
+                    <div class="stat-desc">Keep creating! ✨</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-figure text-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div class="stat-title">Shared With</div>
+                    <div class="stat-value text-secondary">3 Circles</div>
+                    <div class="stat-desc">Friends love your work!</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-figure text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </div>
+                    <div class="stat-title">Reactions</div>
+                    <div class="stat-value text-accent">45 ❤️</div>
+                    <div class="stat-desc">You're amazing!</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer footer-center p-10 bg-white text-base-content shadow-inner mt-12">
+        <div>
+            <p class="font-bold text-lg">
+                <span class="text-primary">✨</span> Wrigs Fashion
+            </p>
+            <p>Draw. Digitize. Play! 🎨</p>
+            <p class="text-sm text-gray-500">Made with love for creative kids</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simple tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Remove active state from all tab buttons
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('tab-active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+
+            // Set active state on clicked tab button
+            event.target.classList.add('tab-active');
+        }
+    </script>
+
+</body>
+</html>

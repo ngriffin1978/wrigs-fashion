@@ -1,0 +1,42 @@
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Vim
+*.swp
+*.swo
+
+# IDE
+.idea
+.vscode
+
+# Misc
+.tmp
+dist
+
+# Wrigs Fashion - User uploads and generated files
+static/uploads/
+static/processed/
+static/pdfs/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Test files
+test-drawing.png

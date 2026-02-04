@@ -1,0 +1,44 @@
+{
+	"name": "wrigs-fashion",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-node": "^5.0.1",
+		"@sveltejs/kit": "^2.5.0",
+		"@sveltejs/vite-plugin-svelte": "^4.0.0",
+		"@types/node": "^25.2.0",
+		"autoprefixer": "^10.4.16",
+		"daisyui": "^4.6.0",
+		"drizzle-kit": "^0.26.2",
+		"postcss": "^8.4.32",
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"tailwindcss": "^3.4.0",
+		"typescript": "^5.3.3",
+		"vite": "^5.0.11"
+	},
+	"dependencies": {
+		"@types/pdfkit": "^0.17.4",
+		"canvas": "^3.2.1",
+		"drizzle-orm": "^0.35.3",
+		"mysql2": "^3.11.5",
+		"nanoid": "^5.0.4",
+		"pdfkit": "^0.17.2",
+		"sharp": "^0.34.5"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	}
+}

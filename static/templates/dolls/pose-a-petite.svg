@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="600" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Paper Doll Template: Pose A (Arms Out) - Petite Build -->
+
+  <defs>
+    <style>
+      .cut-line { stroke: #999; stroke-width: 1; stroke-dasharray: 5,5; fill: none; }
+      .body-outline { stroke: #333; stroke-width: 3; fill: #fef3e2; }
+      .face-detail { stroke: #333; stroke-width: 2; fill: none; }
+    </style>
+  </defs>
+
+  <!-- Base stand/tab at bottom -->
+  <rect class="body-outline" x="160" y="570" width="80" height="25" rx="3"/>
+  <text x="200" y="587" text-anchor="middle" font-size="10" fill="#666">fold here</text>
+
+  <!-- Legs (slimmer) -->
+  <rect class="body-outline" x="170" y="410" width="28" height="160" rx="8"/>
+  <rect class="body-outline" x="202" y="410" width="28" height="160" rx="8"/>
+
+  <!-- Torso/Body (smaller frame) -->
+  <ellipse class="body-outline" cx="200" cy="310" rx="45" ry="90"/>
+
+  <!-- Arms (out to sides) -->
+  <ellipse class="body-outline" cx="145" cy="290" rx="18" ry="65" transform="rotate(-30 145 290)"/>
+  <ellipse class="body-outline" cx="255" cy="290" rx="18" ry="65" transform="rotate(30 255 290)"/>
+
+  <!-- Neck -->
+  <rect class="body-outline" x="185" y="210" width="30" height="25" rx="5"/>
+
+  <!-- Head -->
+  <circle class="body-outline" cx="200" cy="160" r="50"/>
+
+  <!-- Face details -->
+  <circle class="face-detail" cx="185" cy="155" r="5"/>
+  <circle class="face-detail" cx="215" cy="155" r="5"/>
+  <path class="face-detail" d="M 185 175 Q 200 185 215 175" />
+
+  <!-- Hair outline -->
+  <path class="body-outline" d="M 150 140 Q 150 110 200 110 Q 250 110 250 140" fill="#8b6f47"/>
+
+  <!-- Outfit placement regions -->
+  <!-- Top region -->
+  <rect id="top-region" x="155" y="240" width="90" height="100" fill="none" stroke="blue" stroke-width="1" opacity="0.3"/>
+
+  <!-- Bottom region -->
+  <rect id="bottom-region" x="170" y="390" width="60" height="115" fill="none" stroke="green" stroke-width="1" opacity="0.3"/>
+
+  <!-- Dress region -->
+  <rect id="dress-region" x="155" y="240" width="90" height="260" fill="none" stroke="purple" stroke-width="1" opacity="0.3"/>
+
+  <!-- Shoes region -->
+  <rect id="shoes-region" x="170" y="540" width="60" height="30" fill="none" stroke="red" stroke-width="1" opacity="0.3"/>
+</svg>
