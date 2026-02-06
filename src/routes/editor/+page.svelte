@@ -1,6 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import AddToCatalogModal from '$lib/components/catalog/AddToCatalogModal.svelte';
+
+	interface Props {
+		data: {
+			user: {
+				id: string;
+				email: string;
+				nickname: string;
+			} | null;
+		};
+	}
+
+	let { data }: Props = $props();
 
 	let canvas: HTMLCanvasElement | undefined = $state();
 	let ctx: CanvasRenderingContext2D | null = null;
@@ -14,6 +27,7 @@
 	let imageUrl = $state('');
 	let backgroundImage: HTMLImageElement | null = null;
 	let canvasReady = $state(false);
+	let saving = $state(false);
 
 	// Get image URL from query params
 	$effect(() => {
@@ -312,6 +326,70 @@
 		link.click();
 	}
 
+	async function saveToPortfolio() {
+		if (!canvas || !data.user) return;
+
+		saving = true;
+
+		try {
+			// Convert canvas to blob
+			const blob = await new Promise<Blob | null>((resolve) =>
+				canvas!.toBlob(resolve, 'image/png')
+			);
+			if (!blob) {
+				alert('Failed to create image! 😅');
+				saving = false;
+				return;
+			}
+
+			// Upload to server
+			const formData = new FormData();
+			formData.append('file', blob, 'design.png');
+
+			const uploadRes = await fetch('/api/upload', {
+				method: 'POST',
+				body: formData
+			});
+			const uploadData = await uploadRes.json();
+
+			if (!uploadRes.ok) {
+				alert(uploadData.error || 'Failed to upload! 😅');
+				saving = false;
+				return;
+			}
+
+			// Save to designs database
+			const designTitle = prompt('Name your design:', 'My Fashion Design') || 'Untitled Design';
+
+			const saveRes = await fetch('/api/designs', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					title: designTitle,
+					originalImageUrl: imageUrl,
+					cleanedImageUrl: uploadData.cleanedUrl,
+					coloredOverlayUrl: uploadData.cleanedUrl
+				})
+			});
+
+			if (saveRes.ok) {
+				alert('🎉 Design saved to your portfolio!');
+				// Optionally redirect to portfolio
+				const shouldGoToPortfolio = confirm('Go to your portfolio now?');
+				if (shouldGoToPortfolio) {
+					goto('/portfolio');
+				}
+			} else {
+				alert('Failed to save design! 😅');
+			}
+		} catch (error) {
+			console.error('Save error:', error);
+			alert('Something went wrong! 😅');
+		} finally {
+			saving = false;
+		}
+	}
+
 	async function saveToServerAndAddToCatalog() {
 		if (!canvas) return;
 		// Convert canvas to blob and upload
@@ -388,9 +466,19 @@
 				<button class="btn btn-outline" onclick={() => window.history.back()}>
 					← Back
 				</button>
-				<button class="btn btn-primary" onclick={saveImage}>
-					💾 Save Design
-				</button>
+				{#if data.user}
+					<button class="btn btn-primary" onclick={saveToPortfolio} disabled={saving}>
+						{#if saving}
+							<span class="loading loading-spinner loading-sm"></span>
+						{:else}
+							💾 Save to Portfolio
+						{/if}
+					</button>
+				{:else}
+					<button class="btn btn-primary" onclick={saveImage}>
+						⬇️ Download
+					</button>
+				{/if}
 				<button class="btn btn-secondary" onclick={saveToServerAndAddToCatalog}>
 					📚 Add to Catalog
 				</button>
@@ -399,6 +487,22 @@
 				</button>
 			</div>
 		</div>
+
+		<!-- Auth Status Alert -->
+		{#if !data.user}
+			<div class="alert alert-info mb-6">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				<div>
+					<h3 class="font-bold">Want to save your designs? 🎨</h3>
+					<p class="text-sm">Sign up for free to save to your portfolio and access all features!</p>
+				</div>
+				<div class="flex-none">
+					<a href="/auth/register" class="btn btn-sm btn-primary">Sign Up Free 🚀</a>
+				</div>
+			</div>
+		{/if}
 
 		<div class="grid lg:grid-cols-[300px_1fr] gap-6">
 			<!-- Toolbar -->

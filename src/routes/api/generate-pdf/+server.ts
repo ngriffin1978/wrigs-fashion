@@ -1,10 +1,16 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { requireAuth } from '$lib/server/auth/guards';
 import { generatePaperDollPDF, type PlacementData } from '$lib/services/pdf-generator';
+import { getDb } from '$lib/server/db';
+import { dollProjects } from '$lib/server/db/schema';
+import { nanoid } from 'nanoid';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+	// Require authentication
+	const user = requireAuth(locals);
 	try {
 		const body = await request.json();
 		const { templateId, designImageUrl, placement, paperSize = 'letter' } = body;
@@ -44,11 +50,30 @@ export const POST: RequestHandler = async ({ request }) => {
 			paperSize: paperSize === 'a4' ? 'a4' : 'letter'
 		});
 
+		// Save doll project to database (optional - designId might not exist yet)
+		const db = getDb();
+		const projectId = nanoid();
+
+		try {
+			await db.insert(dollProjects).values({
+				id: projectId,
+				userId: user.id,
+				designId: body.designId || projectId, // Use projectId as fallback if no designId
+				dollTemplateId: templateId,
+				pieces: [placement],
+				pdfUrl: result.pdfUrl
+			});
+		} catch (dbError) {
+			console.warn('Failed to save doll project to database:', dbError);
+			// Continue anyway - PDF was generated successfully
+		}
+
 		return json({
 			success: true,
 			pdfUrl: result.pdfUrl,
 			filename: result.filename,
-			message: 'PDF generated successfully!'
+			projectId,
+			message: 'Paper doll created! 🎉'
 		});
 	} catch (err: any) {
 		console.error('PDF generation error:', err);

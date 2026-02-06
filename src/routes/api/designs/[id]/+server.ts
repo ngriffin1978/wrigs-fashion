@@ -1,0 +1,52 @@
+import { json, error } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { requireAuth } from '$lib/server/auth/guards';
+import { getDb } from '$lib/server/db';
+import { designs } from '$lib/server/db/schema';
+import { eq, and } from 'drizzle-orm';
+
+// GET /api/designs/[id] - Get single design
+export const GET: RequestHandler = async ({ locals, params }) => {
+	const user = requireAuth(locals);
+
+	const db = getDb();
+	const design = await db.query.designs.findFirst({
+		where: and(
+			eq(designs.id, params.id!),
+			eq(designs.userId, user.id)
+		)
+	});
+
+	if (!design) {
+		throw error(404, 'Design not found! 🔍');
+	}
+
+	return json({ design });
+};
+
+// DELETE /api/designs/[id] - Delete design
+export const DELETE: RequestHandler = async ({ locals, params }) => {
+	const user = requireAuth(locals);
+
+	const db = getDb();
+
+	// Check ownership
+	const design = await db.query.designs.findFirst({
+		where: and(
+			eq(designs.id, params.id!),
+			eq(designs.userId, user.id)
+		)
+	});
+
+	if (!design) {
+		throw error(404, 'Design not found! 🔍');
+	}
+
+	// Delete the design
+	await db.delete(designs).where(eq(designs.id, params.id!));
+
+	return json({
+		success: true,
+		message: 'Design deleted! 🗑️'
+	});
+};
