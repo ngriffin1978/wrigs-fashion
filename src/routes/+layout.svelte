@@ -1,6 +1,44 @@
 <script lang="ts">
 	import '../app.css';
 	import ColorCustomizer from '$lib/components/ColorCustomizer.svelte';
+	import { goto } from '$app/navigation';
+
+	interface Props {
+		data: {
+			user: {
+				id: string;
+				email: string;
+				nickname: string;
+				avatarUrl?: string;
+				emailVerified: boolean;
+				role: string;
+			} | null;
+		};
+	}
+
+	let { data }: Props = $props();
+
+	async function handleLogout() {
+		try {
+			const response = await fetch('/api/auth/logout', {
+				method: 'POST'
+			});
+
+			if (response.ok) {
+				// Redirect to homepage after logout
+				goto('/');
+			}
+		} catch (error) {
+			console.error('Logout error:', error);
+			// Still redirect even if there's an error
+			goto('/');
+		}
+	}
+
+	// Get first letter of nickname for avatar
+	function getAvatarLetter(): string {
+		return data.user?.nickname?.charAt(0).toUpperCase() || 'U';
+	}
 </script>
 
 <!-- Navigation -->
@@ -15,45 +53,45 @@
 			</span>
 		</a>
 	</div>
-	<div class="navbar-end">
-		<button class="btn btn-ghost btn-circle">
-			<div class="indicator">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-6 w-6"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
+	<div class="navbar-end gap-2">
+		{#if data.user}
+			<!-- Authenticated User -->
+			<span class="text-sm hidden sm:inline">Hi, {data.user.nickname}! 👋</span>
+
+			<div class="dropdown dropdown-end">
+				<label tabindex="0" class="btn btn-ghost btn-circle avatar">
+					{#if data.user.avatarUrl}
+						<div class="w-10 rounded-full">
+							<img src={data.user.avatarUrl} alt={data.user.nickname} />
+						</div>
+					{:else}
+						<div
+							class="w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold"
+						>
+							{getAvatarLetter()}
+						</div>
+					{/if}
+				</label>
+				<ul
+					tabindex="0"
+					class="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-white rounded-box w-52"
 				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a 3 3 0 11-6 0v-1m6 0H9"
-					/>
-				</svg>
-				<span class="badge badge-xs badge-primary indicator-item"></span>
+					<li><a href="/portfolio">My Portfolio</a></li>
+					<li><a href="/catalogs">My Catalogs</a></li>
+					<li><a href="/circles">My Circles</a></li>
+					<li><a href="/settings">Settings</a></li>
+					<li><button onclick={handleLogout}>Logout 👋</button></li>
+				</ul>
 			</div>
-		</button>
-		<div class="dropdown dropdown-end">
-			<label tabindex="0" class="btn btn-ghost btn-circle avatar">
-				<div
-					class="w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold"
-				>
-					M
-				</div>
-			</label>
-			<ul
-				tabindex="0"
-				class="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-white rounded-box w-52"
-			>
-				<li><a href="/portfolio">My Portfolio</a></li>
-				<li><a href="/catalogs">My Catalogs</a></li>
-				<li><a href="/circles">My Circles</a></li>
-				<li><a>Settings</a></li>
-				<li><a>Logout</a></li>
-			</ul>
-		</div>
+		{:else}
+			<!-- Not Authenticated -->
+			<a href="/auth/login" class="btn btn-ghost">
+				Login 🔑
+			</a>
+			<a href="/auth/register" class="btn btn-primary">
+				Sign Up 🚀
+			</a>
+		{/if}
 	</div>
 </nav>
 
