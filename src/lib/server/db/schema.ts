@@ -5,8 +5,11 @@ import { relations } from 'drizzle-orm';
 export const users = mysqlTable('users', {
 	id: varchar('id', { length: 255 }).primaryKey(),
 	email: varchar('email', { length: 255 }).notNull().unique(),
+	emailVerified: boolean('email_verified').notNull().default(false),
+	password: varchar('password', { length: 255 }),
 	nickname: varchar('nickname', { length: 100 }).notNull(),
 	avatarUrl: varchar('avatar_url', { length: 500 }),
+	role: varchar('role', { length: 20 }).notNull().default('user'),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
@@ -126,10 +129,46 @@ export const compliments = mysqlTable('compliments', {
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
+// Session table - Better Auth session management
+export const sessions = mysqlTable('sessions', {
+	id: varchar('id', { length: 255 }).primaryKey(),
+	userId: varchar('user_id', { length: 255 })
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	expiresAt: timestamp('expires_at').notNull(),
+	ipAddress: varchar('ip_address', { length: 45 }),
+	userAgent: text('user_agent'),
+	createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
+// Account table - for OAuth providers (future: Google, etc.)
+export const accounts = mysqlTable('accounts', {
+	id: varchar('id', { length: 255 }).primaryKey(),
+	userId: varchar('user_id', { length: 255 })
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	accountId: varchar('account_id', { length: 255 }).notNull(),
+	providerId: varchar('provider_id', { length: 50 }).notNull(),
+	accessToken: text('access_token'),
+	refreshToken: text('refresh_token'),
+	expiresAt: timestamp('expires_at'),
+	createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
+// Verification table - email verification tokens (optional V1)
+export const verifications = mysqlTable('verifications', {
+	id: varchar('id', { length: 255 }).primaryKey(),
+	identifier: varchar('identifier', { length: 255 }).notNull(),
+	value: varchar('value', { length: 255 }).notNull(),
+	expiresAt: timestamp('expires_at').notNull(),
+	createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
 // Catalog table - fashion catalogs (collections of designs on a canvas)
 export const catalogs = mysqlTable('catalogs', {
 	id: varchar('id', { length: 255 }).primaryKey(),
-	sessionId: varchar('session_id', { length: 255 }).notNull(),
+	sessionId: varchar('session_id', { length: 255 }),
+	userId: varchar('user_id', { length: 255 }).references(() => users.id, { onDelete: 'cascade' }),
 	title: varchar('title', { length: 200 }).notNull().default('My Fashion Catalog'),
 	shareSlug: varchar('share_slug', { length: 20 }).unique(),
 	isPublic: boolean('is_public').notNull().default(false),
@@ -163,7 +202,10 @@ export const usersRelations = relations(users, ({ many }) => ({
 	circleMemberships: many(circleMembers),
 	sharedItems: many(sharedItems),
 	reactions: many(reactions),
-	compliments: many(compliments)
+	compliments: many(compliments),
+	sessions: many(sessions),
+	accounts: many(accounts),
+	catalogs: many(catalogs)
 }));
 
 export const designsRelations = relations(designs, ({ one, many }) => ({
@@ -248,13 +290,31 @@ export const complimentsRelations = relations(compliments, ({ one }) => ({
 	})
 }));
 
-export const catalogsRelations = relations(catalogs, ({ many }) => ({
-	items: many(catalogItems)
+export const catalogsRelations = relations(catalogs, ({ one, many }) => ({
+	items: many(catalogItems),
+	user: one(users, {
+		fields: [catalogs.userId],
+		references: [users.id]
+	})
 }));
 
 export const catalogItemsRelations = relations(catalogItems, ({ one }) => ({
 	catalog: one(catalogs, {
 		fields: [catalogItems.catalogId],
 		references: [catalogs.id]
+	})
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+	user: one(users, {
+		fields: [sessions.userId],
+		references: [users.id]
+	})
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+	user: one(users, {
+		fields: [accounts.userId],
+		references: [users.id]
 	})
 }));
