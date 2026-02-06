@@ -5,7 +5,6 @@ import { validateRegistration } from '$lib/server/auth/validation';
 import { getDb } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
 import { migrateSessionCatalogs } from '$lib/server/services/catalog-migration';
 import { getSessionId } from '$lib/server/session';
 
@@ -33,42 +32,68 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw error(400, 'Someone already has that email. Try logging in instead! 🔐');
 		}
 
-		// Create user with Better Auth
-		const result = await auth.api.signUpEmail({
-			body: {
+		// Create a proper Request for Better Auth
+		const signUpRequest = new Request('http://localhost/api/auth/sign-up/email', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
 				email: email.toLowerCase(),
 				password,
-				name: nickname,
-				image: undefined
-			}
+				name: nickname
+			})
 		});
 
-		if (!result) {
-			throw error(500, 'Failed to create account. Please try again! 😅');
+		// Call Better Auth's signUp handler
+		const signUpResponse = await auth.handler(signUpRequest);
+		const signUpData = await signUpResponse.json();
+
+		if (!signUpResponse.ok || !signUpData.user) {
+			console.error('Better Auth signup failed:', signUpData);
+			throw error(500, signUpData.error?.message || 'Failed to create account. Please try again! 😅');
 		}
 
-		// Create session
-		const session = await auth.api.signInEmail({
-			body: {
+		// Create a proper Request for Better Auth sign-in
+		const signInRequest = new Request('http://localhost/api/auth/sign-in/email', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
 				email: email.toLowerCase(),
 				password
-			}
+			})
 		});
 
-		if (!session) {
+		// Sign in the user to get a session
+		const signInResponse = await auth.handler(signInRequest);
+		const signInData = await signInResponse.json();
+
+		if (!signInResponse.ok || !signInData.token) {
+			console.error('Better Auth signin failed:', signInData);
 			throw error(500, 'Account created but login failed. Please try logging in! 🔑');
 		}
 
-		// Set session cookie
-		const sessionCookie = auth.createSessionCookie(session.token);
-		cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '/',
-			...sessionCookie.attributes
-		});
+		// Set session cookie from Better Auth response
+		const setCookieHeader = signInResponse.headers.get('set-cookie');
+		if (setCookieHeader) {
+			// Parse and set the session cookie
+			const cookieMatch = setCookieHeader.match(/([^=]+)=([^;]+)/);
+			if (cookieMatch) {
+				cookies.set(cookieMatch[1], cookieMatch[2], {
+					path: '/',
+					httpOnly: true,
+					sameSite: 'lax',
+					secure: false, // Set to true in production
+					maxAge: 60 * 60 * 24 * 30 // 30 days
+				});
+			}
+		}
 
 		// Migrate anonymous session catalogs to user account
 		const sessionId = getSessionId(cookies);
-		const migrationResult = await migrateSessionCatalogs(sessionId, result.user.id);
+		const migrationResult = await migrateSessionCatalogs(sessionId, signUpData.user.id);
 
 		// Build success message
 		let message = '🎉 Account created successfully!';
@@ -79,7 +104,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		return json({
 			success: true,
-			userId: result.user.id,
+			userId: signUpData.user.id,
+			user: {
+				id: signUpData.user.id,
+				email: signUpData.user.email,
+				nickname: signUpData.user.name
+			},
 			message,
 			migratedCatalogs: migrationResult.count
 		}, { status: 201 });

@@ -1,16 +1,17 @@
 import { mysqlTable, varchar, text, timestamp, int, json, boolean, float } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
-// User table
+// User table - matches Better Auth requirements
 export const users = mysqlTable('users', {
 	id: varchar('id', { length: 255 }).primaryKey(),
 	email: varchar('email', { length: 255 }).notNull().unique(),
 	emailVerified: boolean('email_verified').notNull().default(false),
 	password: varchar('password', { length: 255 }),
-	nickname: varchar('nickname', { length: 100 }).notNull(),
-	avatarUrl: varchar('avatar_url', { length: 500 }),
+	name: varchar('name', { length: 100 }).notNull(),
+	image: varchar('image', { length: 500 }), // Better Auth uses 'image' not 'avatarUrl'
 	role: varchar('role', { length: 20 }).notNull().default('user'),
-	createdAt: timestamp('created_at').notNull().defaultNow()
+	createdAt: timestamp('created_at').notNull().defaultNow(),
+	updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow()
 });
 
 // Design table - user's fashion sketches

@@ -19,28 +19,46 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw error(400, emailValidation.error!);
 		}
 
-		// Attempt login with Better Auth
-		const session = await auth.api.signInEmail({
-			body: {
+		// Create a proper Request for Better Auth
+		const signInRequest = new Request('http://localhost/api/auth/sign-in/email', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
 				email: email.toLowerCase(),
 				password
-			}
+			})
 		});
 
-		if (!session) {
+		// Call Better Auth's signIn handler
+		const signInResponse = await auth.handler(signInRequest);
+		const signInData = await signInResponse.json();
+
+		if (!signInResponse.ok || !signInData.user) {
+			console.error('Better Auth signin failed:', signInData);
 			throw error(401, "Hmm, that password doesn't match. Try again! 🔑");
 		}
 
-		// Set session cookie
-		const sessionCookie = auth.createSessionCookie(session.token);
-		cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '/',
-			...sessionCookie.attributes
-		});
+		// Set session cookie from Better Auth response
+		const setCookieHeader = signInResponse.headers.get('set-cookie');
+		if (setCookieHeader) {
+			// Parse and set the session cookie
+			const cookieMatch = setCookieHeader.match(/([^=]+)=([^;]+)/);
+			if (cookieMatch) {
+				cookies.set(cookieMatch[1], cookieMatch[2], {
+					path: '/',
+					httpOnly: true,
+					sameSite: 'lax',
+					secure: false, // Set to true in production
+					maxAge: 60 * 60 * 24 * 30 // 30 days
+				});
+			}
+		}
 
 		// Migrate anonymous session catalogs to user account
 		const sessionId = getSessionId(cookies);
-		const migrationResult = await migrateSessionCatalogs(sessionId, session.user.id);
+		const migrationResult = await migrateSessionCatalogs(sessionId, signInData.user.id);
 
 		// Build success message
 		let message = '🎉 Welcome back!';
@@ -52,9 +70,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		return json({
 			success: true,
 			user: {
-				id: session.user.id,
-				email: session.user.email,
-				nickname: session.user.name
+				id: signInData.user.id,
+				email: signInData.user.email,
+				nickname: signInData.user.name
 			},
 			message,
 			migratedCatalogs: migrationResult.count

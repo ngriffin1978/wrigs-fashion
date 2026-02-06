@@ -1,11 +1,18 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { getDb } from '$lib/server/db';
+import * as schema from '$lib/server/db/schema';
 import { env } from '$env/dynamic/private';
 
 export const auth = betterAuth({
 	database: drizzleAdapter(getDb(), {
-		provider: 'mysql'
+		provider: 'mysql',
+		schema: {
+			user: schema.users,
+			session: schema.sessions,
+			account: schema.accounts,
+			verification: schema.verifications
+		}
 	}),
 
 	emailAndPassword: {
@@ -34,5 +41,7 @@ export const auth = betterAuth({
 
 	secret: env.AUTH_SECRET || 'dev_secret_change_in_production',
 
-	trustedOrigins: [env.PUBLIC_APP_URL || 'http://localhost:3001']
+	trustedOrigins: [env.PUBLIC_APP_URL || 'http://localhost:3001'],
+
+	baseURL: env.BETTER_AUTH_URL || env.PUBLIC_APP_URL || 'http://localhost:3001'
 });
