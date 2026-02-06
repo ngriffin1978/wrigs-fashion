@@ -9,6 +9,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **V1 Theme:** Draw it → digitize it → make a printable paper doll (PDF)
 **Primary goal:** A delightful, safe creative flow that works great on tablets and laptops.
 
+**Current Status:** Phase 2 Complete (Paper Doll System + PDF Generation)
+**Next Phase:** Authentication + Database Integration
+
 ---
 
 ## 1) Product Summary (V1)
@@ -87,60 +90,88 @@ Wrigs Fashion is a web app where kids can:
 
 ---
 
-## 5) Technical Plan (Actual Implementation)
-**Web stack (implemented):**
+## 5) Technical Stack (Actual Implementation)
+**Web stack:**
 - SvelteKit (with Svelte 5 runes) + TypeScript
 - TailwindCSS + DaisyUI (Lemon Meringue theme)
 - Drizzle ORM + MySQL (schema defined, not yet connected)
 - Auth: Lucia Auth (planned, not yet implemented)
-- Object storage: Local static/uploads (Supabase Storage or R2 for production)
-- Image processing: server-side Sharp.js with color normalization
-- PDF generation: PDFKit (planned, not yet implemented)
+- Object storage: Local static files (production TBD: Supabase Storage or R2)
+- Image processing: Sharp.js (server-side)
+- PDF generation: PDFKit (✅ implemented)
+- Deployment: adapter-node (Node.js server)
 
-**Architecture notes:**
-- Heavy processing server-side (image cleanup: 2-4 seconds typical)
-- Synchronous processing with 10MB file size limit
-- Client-side canvas editor for real-time drawing tools
-- Static file serving for processed images
+**Key Architecture Decisions:**
+- Session-based auth (not cookies) via sessionId stored in DB
+- Catalogs use sessionId (not userId) to support pre-auth usage
+- Image processing server-side (2-4 seconds, 10MB limit)
+- Synchronous API endpoints (no background jobs yet)
+- Canvas-based editor for real-time drawing
+- Static file serving from `/static` directory
 
 ---
 
-## 6) Data Model (Initial Draft)
-### User
-- id, email, nickname, avatarUrl, createdAt
+## 6) Data Model (Drizzle ORM Schema)
+**Schema Location:** `src/lib/server/db/schema.ts`
 
-### Design
-- id, userId, title
-- originalImageUrl
-- cleanedImageUrl
-- coloredOverlayUrl (optional)
-- createdAt, updatedAt
+### Core Tables (Implemented)
 
-### DollTemplate
-- id, name, pose, baseImageUrl
-- printableBasePdfUrl (optional pre-render)
-- regions: JSON (where outfits should fit)
-
-### DollProject (generated printable set)
-- id, userId, designId, dollTemplateId
-- pieces: JSON (top/bottom/dress/accessories placements)
-- pdfUrl (generated)
+**users**
+- id (varchar PK), email (unique), nickname, avatarUrl
 - createdAt
 
-### Circle
-- id, ownerId, name, inviteCode, createdAt
+**designs** (fashion sketches)
+- id (varchar PK), userId (FK), title
+- originalImageUrl, cleanedImageUrl, coloredOverlayUrl
+- createdAt, updatedAt
+- Cascade delete on user deletion
 
-### CircleMember
-- id, circleId, userId, role
+**dollTemplates** (paper doll bases)
+- id (varchar PK), name, pose, baseImageUrl
+- printableBasePdfUrl, regions (JSON)
+- createdAt
 
-### SharedItem
-- id, circleId, itemType ("design" | "dollProject"), itemId, createdAt
+**dollProjects** (generated PDFs)
+- id (varchar PK), userId (FK), designId (FK), dollTemplateId (FK)
+- pieces (JSON array), pdfUrl
+- createdAt
+- Cascade delete on user/design deletion
 
-### Reaction
-- id, userId, sharedItemId, reactionType, createdAt
+**catalogs** (NEW: fashion collections)
+- id (varchar PK), sessionId, title, shareSlug (unique)
+- isPublic, backgroundColor, backgroundPattern
+- createdAt, updatedAt
+- Note: Uses sessionId (not userId) for pre-auth support
 
-### Compliment
-- id, userId, sharedItemId, complimentType, createdAt
+**catalogItems** (images on catalog canvas)
+- id (varchar PK), catalogId (FK), imageUrl
+- positionX, positionY, width, height, rotation, zIndex
+- createdAt
+
+### Sharing Tables (Planned)
+
+**circles** (invite-only groups)
+- id (varchar PK), ownerId (FK), name, inviteCode (unique)
+- createdAt
+
+**circleMembers**
+- id (varchar PK), circleId (FK), userId (FK), role
+- joinedAt
+
+**sharedItems**
+- id (varchar PK), circleId (FK), itemType, itemId, sharedBy (FK)
+- createdAt
+
+**reactions** (emoji reactions)
+- id (varchar PK), userId (FK), sharedItemId (FK), reactionType
+- createdAt
+
+**compliments** (preset phrases)
+- id (varchar PK), userId (FK), sharedItemId (FK), complimentType
+- createdAt
+
+### ID Generation
+Use `nanoid()` for all IDs (URL-safe, collision-resistant, shorter than UUID)
 
 ---
 
@@ -207,14 +238,45 @@ Wrigs Fashion is a web app where kids can:
 ---
 
 ## 10) Milestones (Execution Order)
-1) ✅ Repo scaffolding + auth + DB + storage (partial: DB schema defined, local storage working)
-2) ✅ Upload + portfolio listing (upload done, portfolio needs implementation)
-3) ✅ Image cleanup pipeline (server) - Sharp.js with color normalization
-4) ✅ Coloring/pattern overlay (client) - 6 drawing tools implemented
-5) ✅ Doll template selection + placement UI - 6 templates with live preview
-6) ✅ PDF generation endpoint - PDFKit with 2-page output
-7) 📋 Circles + sharing + reactions/compliments (needs auth first)
-8) 📋 Polish: onboarding, empty states, print QA
+1) ✅ **Phase 1:** Repo scaffolding + image upload + processing + canvas editor
+   - Upload with drag-and-drop + freeform crop
+   - Sharp.js pipeline (background removal, color normalization)
+   - 6 drawing tools (Brush, Spray, Glitter, Stamp, Magic Wand, Eraser)
+   - Pattern overlays (dots, stripes, stars, hearts, sparkles)
+
+2) ✅ **Phase 2:** Paper doll templates + PDF generation
+   - 6 inclusive templates (2 poses × 3 body types)
+   - Template selection UI with filters
+   - Interactive placement with canvas preview
+   - PDFKit 2-page output (Letter + A4)
+
+3) ✅ **Phase 2.5:** Catalog system (BONUS feature)
+   - Multi-image canvas for fashion collections
+   - Drag/resize/rotate items on canvas
+   - Share catalogs via unique slugs
+   - Session-based (works without auth)
+
+4) 📋 **Phase 3:** Authentication + Database Integration (NEXT)
+   - Lucia Auth setup
+   - User registration/login
+   - Connect to MySQL database
+   - Migrate session-based catalogs to user accounts
+
+5) 📋 **Phase 4:** Portfolio CRUD
+   - Portfolio listing page
+   - Design management (view, delete, re-download)
+   - Link uploaded designs to user accounts
+
+6) 📋 **Phase 5:** Sharing + Circles
+   - Invite-only circles
+   - Share designs/dolls to circles
+   - Reactions + preset compliments
+
+7) 📋 **Phase 6:** Polish & Deploy
+   - Onboarding flow
+   - Empty states
+   - Error handling UX
+   - Production deployment
 
 ---
 
@@ -237,33 +299,60 @@ When implementing, Claude should:
 
 ### Code Style
 - TypeScript strict mode enabled
-- ESLint + Prettier for consistency
-- Functional components with hooks (no class components)
+- **Svelte 5 runes:** Use `$state`, `$derived`, `$effect` (not Svelte 4 syntax)
+- Event handlers: Use `onchange={handler}` NOT `on:change={handler}`
+- Functional style (no class components)
 
-### File Organization
-- `/src/app/` - Next.js App Router pages and API routes
-- `/src/components/` - React components (grouped by feature)
-- `/src/lib/` - Utilities, services, and business logic
-  - `/lib/config/` - Centralized configuration
-  - `/lib/services/` - Image processing, PDF generation, storage
-  - `/lib/db/` - Prisma client and database utilities
-- `/prisma/` - Database schema and migrations
-- `/public/` - Static assets (doll templates, pattern overlays)
+### File Organization (SvelteKit)
+```
+src/
+├── routes/                    # Pages and API routes
+│   ├── +page.svelte          # Homepage
+│   ├── +layout.svelte        # Root layout
+│   ├── upload/               # Upload flow
+│   ├── editor/               # Canvas editor
+│   ├── doll-builder/         # Paper doll system
+│   ├── catalogs/             # Catalog system
+│   ├── portfolio/            # Portfolio (needs implementation)
+│   └── api/                  # API endpoints
+│       ├── upload/+server.ts
+│       ├── generate-pdf/+server.ts
+│       └── catalogs/         # Catalog CRUD APIs
+├── lib/
+│   ├── components/           # Reusable Svelte components
+│   │   └── catalog/          # Catalog-specific components
+│   ├── services/             # Business logic
+│   │   └── pdf-generator.ts  # PDFKit service
+│   ├── data/
+│   │   └── doll-templates.ts # Template metadata
+│   └── server/               # Server-only code
+│       ├── session.ts        # Session management
+│       └── db/               # Drizzle ORM
+│           ├── index.ts      # DB client
+│           └── schema.ts     # Database schema
+static/                        # Static assets
+├── templates/dolls/          # 6 SVG doll templates
+├── uploads/                  # Processed images (runtime)
+└── pdfs/                     # Generated PDFs (runtime)
+```
 
 ### Naming Conventions
-- Components: PascalCase (e.g., `DesignEditor.tsx`)
-- Utilities: camelCase (e.g., `imageProcessor.ts`)
-- API routes: kebab-case folders (e.g., `api/paper-dolls/`)
+- Components: PascalCase (e.g., `CatalogCanvas.svelte`)
+- Utilities: camelCase (e.g., `pdfGenerator.ts`)
+- API routes: SvelteKit convention (e.g., `+server.ts`, `[id]/+server.ts`)
+- Database tables: snake_case (e.g., `doll_projects`)
 
 ### Environment Variables
-- Use `.env.local` for local development
-- Required vars: `DATABASE_URL`, `STORAGE_BUCKET`, `NEXTAUTH_SECRET`
-- Document all env vars in `.env.example`
+```bash
+DATABASE_URL="mysql://user:pass@localhost:3306/wrigs_fashion"
+# Optional for development - defaults will work
+```
 
-### Testing
-- Test image upload with various file types (jpg, png, heic)
-- Test PDF generation with Letter and A4 sizes
-- Test on tablet viewports (768px, 1024px)
+### Testing Approach
+- Manual testing on tablet viewports (768px, 1024px)
+- Test image formats: JPG, PNG, HEIC
+- Test PDF on both Letter (8.5x11) and A4 (210x297mm)
+- Print test: Verify cut lines and margins
 
 ---
 
@@ -305,20 +394,23 @@ When implementing, Claude should:
 # 1. Install dependencies
 npm install
 
-# 2. Configure environment variables (optional for V1)
-cp .env.example .env
-# Edit .env with database URL if needed (not required for Phase 1)
+# 2. Configure environment variables (OPTIONAL - app works without DB)
+# Only needed if connecting to MySQL database
+echo 'DATABASE_URL="mysql://user:pass@localhost:3306/wrigs_fashion"' > .env
 
 # 3. Start development server
 npm run dev
-# App runs on http://localhost:3001 (port 3000 was in use)
+# App runs on http://localhost:5173 (default Vite port)
+# Or http://localhost:3001 if 5173 is in use
 ```
 
 **Current Phase Status:**
-- ✅ Phase 1 Complete: Upload + Crop + Processing + Editor
-- ✅ Phase 2 Complete: Paper Doll Templates + PDF Generation
-- 📋 Phase 3 Next: Authentication + Database Integration
-- 📋 Phase 4 Future: Portfolio CRUD + Sharing
+- ✅ Phase 1: Upload + Crop + Processing + Editor
+- ✅ Phase 2: Paper Doll Templates + PDF Generation
+- ✅ Phase 2.5: Catalog System (bonus feature)
+- 📋 Phase 3 (NEXT): Authentication + Database Integration
+- 📋 Phase 4: Portfolio CRUD + User Management
+- 📋 Phase 5: Sharing + Circles
 
 ### Common Commands
 
@@ -335,9 +427,15 @@ npm run check:watch  # Type-check in watch mode
 ```bash
 npm run db:generate  # Generate migration files from schema changes
 npm run db:migrate   # Apply migrations to database
-npm run db:push      # Push schema changes directly (dev only)
-npm run db:studio    # Open Drizzle Studio (database GUI)
+npm run db:push      # Push schema changes directly (dev only, bypasses migrations)
+npm run db:studio    # Open Drizzle Studio (database GUI at http://localhost:4983)
 ```
+
+**Important Database Notes:**
+- Schema is defined but database is NOT yet connected
+- App works without database connection (uses sessionId + static files)
+- Phase 3 will connect MySQL and run migrations
+- `db:push` is for development only - use `db:generate` + `db:migrate` for production
 
 ### Development Patterns
 
@@ -399,10 +497,28 @@ npx playwright@1.58.1 codegen http://localhost:3001/
 - Server-side: structured error responses
 
 **Testing:**
-- Unit tests: Vitest for utilities
-- Component tests: Playwright Component Testing
-- E2E tests: Playwright for critical flows
-- Visual tests: Image/PDF regression testing
+- Manual testing on tablet viewports (Chrome DevTools)
+- Test with real images: JPG, PNG, HEIC formats
+- Print test PDFs to verify cut lines and margins
+- No automated tests yet (add in Phase 6)
+
+**Troubleshooting:**
+```bash
+# Permission errors with .svelte-kit directory
+sudo rm -rf .svelte-kit
+npm run dev
+
+# Kill all Vite processes if port conflicts
+pkill -f "vite dev"
+npm run dev
+
+# Check for multiple Vite instances
+ps aux | grep vite
+
+# Clear node_modules if dependency issues
+rm -rf node_modules package-lock.json
+npm install
+```
 
 ---
 
@@ -418,30 +534,67 @@ npx playwright@1.58.1 codegen http://localhost:3001/
   - auth.ts - Auth utilities (not yet needed)
 ```
 
-### API Routes Organization
+### API Routes (Implemented)
 ```
 /src/routes/api/
-  ✅ upload/+server.ts - Image upload and processing (113 lines)
-  ✅ generate-pdf/+server.ts - PDF generation (40 lines)
-  ✅ catalogs/ - Catalog CRUD endpoints
-  📋 designs/ - CRUD for designs (planned, needs auth first)
-  📋 circles/ - Sharing and circles (planned)
+  ✅ upload/+server.ts
+     - POST: Upload image, process with Sharp.js
+     - Returns: original + cleaned image URLs
+
+  ✅ generate-pdf/+server.ts
+     - POST: Generate paper doll PDF
+     - Inputs: templateId, designUrl, placement, paperSize
+     - Returns: PDF download URL
+
+  ✅ catalogs/+server.ts
+     - GET: List catalogs for session
+     - POST: Create new catalog
+
+  ✅ catalogs/[id]/+server.ts
+     - GET: Get catalog by ID
+     - PATCH: Update catalog (title, background)
+     - DELETE: Delete catalog
+
+  ✅ catalogs/[id]/items/+server.ts
+     - POST: Add item to catalog
+
+  ✅ catalogs/[id]/items/[itemId]/+server.ts
+     - PATCH: Update item position/size/rotation
+     - DELETE: Remove item
+
+  ✅ catalogs/[id]/share/+server.ts
+     - POST: Generate shareable link
+
+  📋 designs/ - Planned (needs auth)
+  📋 circles/ - Planned (Phase 5)
 ```
 
-### Component Organization
+### Pages (Implemented)
 ```
 /src/routes/
-  ✅ upload/+page.svelte - Upload + freeform crop tool (569 lines)
-  ✅ editor/+page.svelte - Canvas editor with 6 tools + "Create Paper Doll" button (560 lines)
-  ✅ doll-builder/+page.svelte - Paper doll template selection (247 lines)
-  ✅ doll-builder/place/+page.svelte - Design placement UI with live preview (367 lines)
-  ✅ catalogs/+page.svelte - Catalog management
-  ✅ +page.svelte - Homepage
+  ✅ +page.svelte - Homepage with hero section
   ✅ +layout.svelte - Navigation + footer
-  📋 portfolio/+page.svelte - Portfolio (needs implementation)
+  ✅ upload/+page.svelte - Upload + freeform crop tool
+  ✅ editor/+page.svelte - Canvas editor with 6 tools
+  ✅ doll-builder/+page.svelte - Template selection
+  ✅ doll-builder/place/+page.svelte - Design placement UI
+  ✅ catalogs/+page.svelte - Catalog listing
+  ✅ catalogs/[id]/+page.svelte - Catalog canvas editor
+  ✅ catalogs/share/[shareSlug]/+page.svelte - Public catalog view
+  📋 portfolio/+page.svelte - Portfolio (placeholder, needs implementation)
+```
 
+### Components (Implemented)
+```
 /src/lib/components/
-  ✅ ColorCustomizer.svelte - Design tool (should be removed from production)
+  ✅ catalog/
+     - CatalogCanvas.svelte - Drag/resize/rotate items
+     - CatalogToolbar.svelte - Canvas controls
+     - CatalogItem.svelte - Individual catalog item
+     - AddToCatalogModal.svelte - Add items modal
+     - CatalogShareModal.svelte - Share link modal
+
+  ✅ ColorCustomizer.svelte - Design tool (remove from production)
 ```
 
 ---
@@ -455,10 +608,219 @@ OR
 
 ---
 
-## 17) Open Questions (Track but don't block)
+## 17) GitHub Actions + CI/CD
+
+Two GitHub Actions workflows are configured:
+
+### claude.yml - Claude PR Assistant
+Triggers on:
+- Issue comments containing `@claude`
+- PR comments containing `@claude`
+- New issues with `@claude` in title/body
+
+Uses `anthropics/claude-code-action@v1` to respond to tagged requests.
+
+### claude-code-review.yml - Automated Code Review
+Triggers on:
+- Pull request opened/synchronized/reopened
+
+Uses Claude Code Review plugin to automatically review PR changes.
+
+**Required Secret:** `ANTHROPIC_API_KEY` must be set in repository secrets.
+
+---
+
+## 18) Session Management (Current Implementation)
+
+**Important:** The app currently uses session-based access WITHOUT authentication.
+
+**How it works:**
+- `sessionId` generated on first visit (stored in `src/lib/server/session.ts`)
+- Catalogs table uses `sessionId` (not `userId`)
+- This allows users to create catalogs before signing up
+
+**Migration path (Phase 3):**
+1. Add authentication with Lucia Auth
+2. Migrate session-based catalogs to user accounts
+3. Keep sessionId for anonymous users (optional)
+4. Link catalogs to userId on login/signup
+
+---
+
+## 19) Critical Implementation Notes
+
+### Image Processing Pipeline
+**Location:** `src/routes/api/upload/+server.ts`
+
+Multi-step Sharp.js pipeline:
+1. Resize to max 2000px (maintain aspect ratio)
+2. Brightness boost (1.4x)
+3. Saturation boost (1.5x)
+4. Normalize (push background toward white)
+5. Posterize to 32 colors (helps Magic Wand tool)
+6. Sharpen edges
+7. Add neutral gray padding (#f8f8f8)
+
+**Why 32 colors?** Makes Magic Wand selection effective by consolidating similar colors.
+
+### PDF Generation Service
+**Location:** `src/lib/services/pdf-generator.ts` (378 lines)
+
+PDFKit-based service generates 2-page PDFs:
+- **Page 1:** Paper doll base with cut lines and fold tab
+- **Page 2:** Outfit piece with user's design, tabs, and cut lines
+
+**Critical details:**
+- Safe print margins: 0.5 inch / 12.7mm
+- Dashed cut lines: `dash(5, 3)` with `#999` color
+- Tab labels: Small "fold" text
+- Footer: "✨ Made with Wrigs Fashion ✨"
+- Supports Letter (8.5×11) and A4 (210×297mm)
+
+### Paper Doll Template System
+**Location:** `src/lib/data/doll-templates.ts` (184 lines)
+
+6 templates hardcoded in TypeScript (not in DB yet):
+- 2 poses (A: arms out, B: arms down)
+- 3 body types (Classic, Curvy, Petite)
+- Each has defined regions: top, bottom, dress, shoes
+- Regions use coordinate system: `{x, y, width, height}`
+
+**Why hardcoded?** Simplifies V1. Can migrate to DB in Phase 3.
+
+### Canvas Editor Tools
+**Location:** `src/routes/editor/+page.svelte` (560 lines)
+
+6 drawing tools implemented:
+1. **Brush** - Basic drawing with variable size
+2. **Spray Paint** - Particle spray effect
+3. **Glitter** - Sparkle overlay effect
+4. **Stamp** - Repeating pattern stamps
+5. **Magic Wand** - Flood fill tool (works well with 32-color posterization)
+6. **Eraser** - Remove pixels
+
+Pattern overlays: dots, stripes, stars, hearts, sparkles
+
+### Catalog System Architecture
+**Key Design Decision:** Catalogs are session-based (not user-based) to allow pre-auth usage.
+
+**Data Flow:**
+1. User visits `/catalogs` → sessionId generated/retrieved
+2. Create catalog → stored with sessionId
+3. Add items → drag/resize/rotate on canvas
+4. Share → generate unique shareSlug
+5. Anyone with shareSlug can view (read-only)
+
+**Migration to auth:** When user signs up, migrate catalogs from sessionId to userId.
+
+---
+
+## 20) Known Issues & TODOs
+
+### Remove Before Production
+- ColorCustomizer component in `+layout.svelte` (design tool, not user feature)
+
+### Database Not Connected
+- Schema defined but no migrations run
+- All data currently in-memory or static files
+- Phase 3 will connect MySQL and persist data
+
+### Missing Features
+- ❌ Authentication (Phase 3)
+- ❌ Portfolio CRUD (Phase 4)
+- ❌ User management (Phase 4)
+- ❌ Sharing circles (Phase 5)
+- ❌ Reactions/compliments (Phase 5)
+
+### File Storage Strategy
+Currently: Local static files in `/static/uploads/` and `/static/pdfs/`
+Production: Needs object storage (Supabase Storage, Cloudflare R2, or AWS S3)
+
+---
+
+## 21) Quick Reference
+
+### Key Files to Know
+
+**Core Pages:**
+- `/src/routes/upload/+page.svelte` - Upload + freeform crop (569 lines)
+- `/src/routes/editor/+page.svelte` - Canvas editor with 6 tools (560 lines)
+- `/src/routes/doll-builder/+page.svelte` - Template selection (247 lines)
+- `/src/routes/doll-builder/place/+page.svelte` - Design placement (367 lines)
+
+**API Endpoints:**
+- `/src/routes/api/upload/+server.ts` - Image processing (113 lines)
+- `/src/routes/api/generate-pdf/+server.ts` - PDF generation (40 lines)
+- `/src/routes/api/catalogs/` - Catalog CRUD endpoints
+
+**Services:**
+- `/src/lib/services/pdf-generator.ts` - PDFKit service (378 lines)
+- `/src/lib/server/session.ts` - Session management
+- `/src/lib/data/doll-templates.ts` - Template metadata (184 lines)
+
+**Database:**
+- `/src/lib/server/db/schema.ts` - Drizzle schema (261 lines)
+- `/src/lib/server/db/index.ts` - DB client
+- `/drizzle.config.ts` - Drizzle configuration
+
+**Config:**
+- `/svelte.config.js` - SvelteKit config (adapter-node)
+- `/tailwind.config.js` - Tailwind + DaisyUI (Lemon Meringue theme)
+- `/package.json` - Dependencies and scripts
+
+### User Flow (Complete Path)
+1. **Upload:** `/upload` → drag/drop image → freeform crop → process
+2. **Edit:** `/editor` → use 6 tools → apply patterns → save PNG
+3. **Paper Doll:** Click "Create Paper Doll" → `/doll-builder` → select template
+4. **Place:** `/doll-builder/place` → position design → adjust scale → choose paper size
+5. **Download:** Click "Generate PDF" → download 2-page printable
+
+### Common Tasks
+
+**Add a new API endpoint:**
+1. Create `/src/routes/api/your-endpoint/+server.ts`
+2. Export `GET`, `POST`, `PATCH`, `DELETE` functions
+3. Return `json()` from `@sveltejs/kit`
+
+**Add a new page:**
+1. Create `/src/routes/your-page/+page.svelte`
+2. Add navigation link in `/src/routes/+layout.svelte`
+3. Add server data with `/src/routes/your-page/+page.server.ts` (optional)
+
+**Query database (when connected):**
+```typescript
+import { db, schema } from '$lib/server/db';
+import { eq } from 'drizzle-orm';
+
+// Query
+const results = await db.query.designs.findMany({
+  where: eq(schema.designs.userId, userId)
+});
+
+// Insert
+await db.insert(schema.designs).values({
+  id: nanoid(),
+  userId,
+  title: 'My Design'
+});
+```
+
+**Generate new migration:**
+```bash
+# 1. Edit src/lib/server/db/schema.ts
+# 2. Generate migration
+npm run db:generate
+# 3. Review generated SQL in ./drizzle/
+# 4. Apply migration
+npm run db:migrate
+```
+
+---
+
+## 22) Open Questions (Track but don't block)
 - Age gating / COPPA compliance approach (V1 can avoid collecting personal data)
 - Parent dashboard (V2)
-- Multiple doll templates (V1.1)
 - Advanced background removal model (V2)
+- Real-time collaboration (V2)
 
 ---
