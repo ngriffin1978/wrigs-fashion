@@ -2,10 +2,12 @@ import { json, error, type RequestHandler } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
 import { catalogs } from '$lib/server/db/schema';
 import { getSessionId } from '$lib/server/session';
-import { eq, and } from 'drizzle-orm';
+import { optionalAuth } from '$lib/server/auth/guards';
+import { eq, and, or } from 'drizzle-orm';
 
 // GET /api/catalogs/:id — get catalog with items
-export const GET: RequestHandler = async ({ params, cookies }) => {
+export const GET: RequestHandler = async ({ params, cookies, locals }) => {
+	const user = optionalAuth(locals);
 	const db = getDb();
 	const catalog = await db.query.catalogs.findFirst({
 		where: eq(catalogs.id, params.id!),
@@ -16,9 +18,12 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 		throw error(404, 'Catalog not found');
 	}
 
-	// Allow access if owner or public
+	// Allow access if owner (by userId OR sessionId) or public
 	const sessionId = getSessionId(cookies);
-	if (catalog.sessionId !== sessionId && !catalog.isPublic) {
+	const isOwner =
+		(user && catalog.userId === user.id) || catalog.sessionId === sessionId;
+
+	if (!isOwner && !catalog.isPublic) {
 		throw error(404, 'Catalog not found');
 	}
 
@@ -26,14 +31,23 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 };
 
 // PATCH /api/catalogs/:id — update catalog metadata
-export const PATCH: RequestHandler = async ({ params, cookies, request }) => {
+export const PATCH: RequestHandler = async ({ params, cookies, request, locals }) => {
+	const user = optionalAuth(locals);
 	const sessionId = getSessionId(cookies);
 	const db = getDb();
 
-	const [catalog] = await db
-		.select()
-		.from(catalogs)
-		.where(and(eq(catalogs.id, params.id!), eq(catalogs.sessionId, sessionId)));
+	// Check ownership via userId OR sessionId
+	let whereClause;
+	if (user) {
+		whereClause = and(
+			eq(catalogs.id, params.id!),
+			or(eq(catalogs.userId, user.id), eq(catalogs.sessionId, sessionId))
+		);
+	} else {
+		whereClause = and(eq(catalogs.id, params.id!), eq(catalogs.sessionId, sessionId));
+	}
+
+	const [catalog] = await db.select().from(catalogs).where(whereClause);
 
 	if (!catalog) {
 		throw error(404, 'Catalog not found');
@@ -55,14 +69,23 @@ export const PATCH: RequestHandler = async ({ params, cookies, request }) => {
 };
 
 // DELETE /api/catalogs/:id — delete catalog
-export const DELETE: RequestHandler = async ({ params, cookies }) => {
+export const DELETE: RequestHandler = async ({ params, cookies, locals }) => {
+	const user = optionalAuth(locals);
 	const sessionId = getSessionId(cookies);
 	const db = getDb();
 
-	const [catalog] = await db
-		.select()
-		.from(catalogs)
-		.where(and(eq(catalogs.id, params.id!), eq(catalogs.sessionId, sessionId)));
+	// Check ownership via userId OR sessionId
+	let whereClause;
+	if (user) {
+		whereClause = and(
+			eq(catalogs.id, params.id!),
+			or(eq(catalogs.userId, user.id), eq(catalogs.sessionId, sessionId))
+		);
+	} else {
+		whereClause = and(eq(catalogs.id, params.id!), eq(catalogs.sessionId, sessionId));
+	}
+
+	const [catalog] = await db.select().from(catalogs).where(whereClause);
 
 	if (!catalog) {
 		throw error(404, 'Catalog not found');

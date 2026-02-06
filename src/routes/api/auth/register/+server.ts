@@ -6,6 +6,8 @@ import { getDb } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { migrateSessionCatalogs } from '$lib/server/services/catalog-migration';
+import { getSessionId } from '$lib/server/session';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
@@ -64,14 +66,22 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			...sessionCookie.attributes
 		});
 
-		// TODO: Trigger catalog migration (implement in Phase 4)
-		// const sessionId = getSessionId(cookies);
-		// await migrateSessionCatalogs(sessionId, result.user.id);
+		// Migrate anonymous session catalogs to user account
+		const sessionId = getSessionId(cookies);
+		const migrationResult = await migrateSessionCatalogs(sessionId, result.user.id);
+
+		// Build success message
+		let message = '🎉 Account created successfully!';
+		if (migrationResult.success && migrationResult.count > 0) {
+			const catalogWord = migrationResult.count === 1 ? 'catalog' : 'catalogs';
+			message += ` We found ${migrationResult.count} ${catalogWord} from your session! ✨`;
+		}
 
 		return json({
 			success: true,
 			userId: result.user.id,
-			message: 'Account created successfully! 🎉'
+			message,
+			migratedCatalogs: migrationResult.count
 		}, { status: 201 });
 
 	} catch (err: any) {

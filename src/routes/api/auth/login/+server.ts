@@ -2,6 +2,8 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { auth } from '$lib/server/auth/config';
 import { validateEmail } from '$lib/server/auth/validation';
+import { migrateSessionCatalogs } from '$lib/server/services/catalog-migration';
+import { getSessionId } from '$lib/server/session';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
@@ -36,9 +38,16 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			...sessionCookie.attributes
 		});
 
-		// TODO: Trigger catalog migration (implement in Phase 4)
-		// const sessionId = getSessionId(cookies);
-		// const migratedCount = await migrateSessionCatalogs(sessionId, session.user.id);
+		// Migrate anonymous session catalogs to user account
+		const sessionId = getSessionId(cookies);
+		const migrationResult = await migrateSessionCatalogs(sessionId, session.user.id);
+
+		// Build success message
+		let message = '🎉 Welcome back!';
+		if (migrationResult.success && migrationResult.count > 0) {
+			const catalogWord = migrationResult.count === 1 ? 'catalog' : 'catalogs';
+			message += ` We found ${migrationResult.count} ${catalogWord} from your session! ✨`;
+		}
 
 		return json({
 			success: true,
@@ -47,7 +56,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				email: session.user.email,
 				nickname: session.user.name
 			},
-			message: 'Welcome back! 🎉'
+			message,
+			migratedCatalogs: migrationResult.count
 		});
 
 	} catch (err: any) {
