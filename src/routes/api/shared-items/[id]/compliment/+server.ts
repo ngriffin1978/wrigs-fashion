@@ -8,7 +8,7 @@ import { nanoid } from 'nanoid';
 import { requireCircleMembership } from '$lib/utils/circle-permissions';
 
 // Valid compliment types with display text
-export const COMPLIMENT_TYPES = {
+const COMPLIMENT_TYPES = {
 	so_creative: 'So creative! 🎨',
 	love_colors: 'Love the colors! 🌈',
 	amazing_design: 'Amazing design! ✨',

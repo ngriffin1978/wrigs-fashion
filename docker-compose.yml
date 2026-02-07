@@ -1,61 +1,35 @@
 version: '3.8'
 
 services:
-  app:
+  wrigs-fashion:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: wrigs-fashion-app
+    container_name: wrigs-fashion
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=mysql://wrigs_user:${DB_PASSWORD}@db:3306/wrigs_fashion
-      - R2_ACCOUNT_ID=${R2_ACCOUNT_ID}
-      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
-      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
-      - R2_BUCKET_NAME=${R2_BUCKET_NAME}
-      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
-      - AUTH_SECRET=${AUTH_SECRET}
-      - PUBLIC_APP_URL=${PUBLIC_APP_URL}
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - wrigs-network
-    volumes:
-      # Mount source code for development (comment out for production)
-      - .:/app
-      - /app/node_modules
-      - /app/.svelte-kit
-
-  db:
-    image: mysql:8.0
-    container_name: wrigs-fashion-db
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - MYSQL_DATABASE=wrigs_fashion
-      - MYSQL_USER=wrigs_user
-      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - "443:443"    # HTTPS
+      - "80:80"      # HTTP (redirects to HTTPS)
     volumes:
       - mysql-data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+      - uploads-data:/app/static/uploads
+      - pdfs-data:/app/static/pdfs
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mysql://wrigs_user:wrigs_password@localhost:3306/wrigs_fashion
+      - PUBLIC_APP_URL=https://localhost
+      - AUTH_SECRET=${AUTH_SECRET:-}
     restart: unless-stopped
-    networks:
-      - wrigs-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:443/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   mysql-data:
     driver: local
-
-networks:
-  wrigs-network:
-    driver: bridge
+  uploads-data:
+    driver: local
+  pdfs-data:
+    driver: local
