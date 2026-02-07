@@ -51,9 +51,9 @@ export const POST: RequestHandler = async ({ request }) => {
 			.png()
 			.toFile(originalPath);
 
-		// Process image: Remove background, enhance drawing colors, reduce color palette
+		// Process image: Remove background, enhance drawing colors
 		// Step 1: Boost brightness aggressively to blow out the background
-		const processed = sharp(buffer)
+		await sharp(buffer)
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
 				withoutEnlargement: true
@@ -64,22 +64,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			})
 			.linear(1.3, 20) // Boost contrast and brightness
 			.normalise() // Auto-level to push background to white
-			.sharpen({ sigma: 1.5 }); // Crisp edges
-
-		// Step 2: Reduce color palette (posterize) for better wand tool performance
-		// This consolidates similar colors into distinct groups
-		const processedBuffer = await processed
-			.toColourspace('srgb')
-			.toBuffer();
-
-		// Step 3: Apply color quantization to reduce to ~32 colors
-		// This makes the wand tool much more effective
-		const quantized = await sharp(processedBuffer)
-			.png({ palette: true, colours: 32, dither: 0 }) // Reduce to 32 colors, no dithering
-			.toBuffer();
-
-		// Step 4: Add to neutral background with padding
-		await sharp(quantized)
+			.sharpen({ sigma: 1.5 }) // Crisp edges
 			.flatten({ background: '#f8f8f8' }) // Light gray neutral background
 			.extend({
 				top: 60,
