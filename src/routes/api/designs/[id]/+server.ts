@@ -2,7 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { requireAuth } from '$lib/server/auth/guards';
 import { getDb } from '$lib/server/db';
-import { designs } from '$lib/server/db/schema';
+import { designs, sharedItems } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 // GET /api/designs/[id] - Get single design
@@ -42,7 +42,12 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		throw error(404, 'Design not found! 🔍');
 	}
 
-	// Delete the design
+	// CRITICAL: Delete related shared items first to prevent orphaned references
+	await db
+		.delete(sharedItems)
+		.where(and(eq(sharedItems.itemType, 'design'), eq(sharedItems.itemId, params.id!)));
+
+	// Delete the design (cascade will delete doll projects)
 	await db.delete(designs).where(eq(designs.id, params.id!));
 
 	return json({

@@ -31,8 +31,9 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		}
 
 		const db = getDb();
-		const newDesign = await db.insert(designs).values({
-			id: nanoid(),
+		const designId = nanoid();
+		await db.insert(designs).values({
+			id: designId,
 			userId: user.id,
 			title,
 			originalImageUrl: originalImageUrl || null,
@@ -42,7 +43,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
 		// Get the created design
 		const createdDesign = await db.query.designs.findFirst({
-			where: eq(designs.id, newDesign.insertId as unknown as string)
+			where: eq(designs.id, designId)
 		});
 
 		return json({

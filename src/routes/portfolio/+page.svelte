@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
+	import ShareToCircleModal from '$lib/components/circles/ShareToCircleModal.svelte';
 
 	interface Props {
 		data: PageData;
@@ -8,6 +9,7 @@
 
 	let { data }: Props = $props();
 	let deleting = $state<string | null>(null);
+	let sharingDesignId = $state<string | null>(null);
 
 	// Format date to relative time
 	function formatDate(dateInput: string | Date): string {
@@ -188,6 +190,11 @@
 										</li>
 									{/if}
 									<li>
+										<button onclick={() => (sharingDesignId = design.id)}>
+											🎉 Share to Circle
+										</button>
+									</li>
+									<li>
 										<button
 											class="text-error"
 											onclick={() => deleteDesign(design.id, design.title)}
@@ -329,3 +336,12 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Share Modal -->
+{#if sharingDesignId}
+	<ShareToCircleModal
+		itemType="design"
+		itemId={sharingDesignId}
+		onclose={() => (sharingDesignId = null)}
+	/>
+{/if}

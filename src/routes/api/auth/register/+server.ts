@@ -15,10 +15,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		// Validate inputs
 		const validation = validateRegistration(email, password, nickname);
 		if (!validation.valid) {
-			throw error(400, {
-				message: 'Validation failed',
-				errors: validation.errors
-			});
+			// Join all error messages into a single string
+			const errorMessages = Object.values(validation.errors).filter(Boolean);
+			const errorMessage = errorMessages.join(', ');
+			throw error(400, `Validation failed: ${errorMessage}`);
 		}
 
 		const db = getDb();

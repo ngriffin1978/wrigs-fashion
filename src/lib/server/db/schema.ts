@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, text, timestamp, int, json, boolean, float } from 'drizzle-orm/mysql-core';
+import { mysqlTable, varchar, text, timestamp, int, json, boolean, float, uniqueIndex } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
 // User table - matches Better Auth requirements
@@ -115,7 +115,10 @@ export const reactions = mysqlTable('reactions', {
 		.references(() => sharedItems.id, { onDelete: 'cascade' }),
 	reactionType: varchar('reaction_type', { length: 20 }).notNull(), // 'heart', 'star', 'paint', 'sparkle'
 	createdAt: timestamp('created_at').notNull().defaultNow()
-});
+}, (table) => ({
+	// Unique constraint to prevent duplicate reactions - enables toggle behavior
+	uniqueUserReaction: uniqueIndex('unique_user_reaction').on(table.userId, table.sharedItemId, table.reactionType)
+}));
 
 // Compliment table - preset compliments on shared items
 export const compliments = mysqlTable('compliments', {

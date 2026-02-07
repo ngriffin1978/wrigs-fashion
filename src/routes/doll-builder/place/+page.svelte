@@ -2,9 +2,11 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { getTemplateById, type DollTemplate, type OutfitRegion } from '$lib/data/doll-templates';
+	import ShareToCircleModal from '$lib/components/circles/ShareToCircleModal.svelte';
 
 	let templateId = $state('');
 	let designImageUrl = $state('');
+	let designId = $state<string | null>(null);
 	let template = $state<DollTemplate | null>(null);
 	let outfitCategory = $state<'top' | 'bottom' | 'dress' | 'shoes'>('top');
 
@@ -22,10 +24,15 @@
 	let designImage: HTMLImageElement | null = null;
 	let loading = $state(true);
 	let generating = $state(false);
+	let showSuccessModal = $state(false);
+	let generatedPdfUrl = $state('');
+	let generatedProjectId = $state<string | null>(null);
+	let showShareModal = $state(false);
 
 	onMount(() => {
 		templateId = $page.url.searchParams.get('template') || '';
 		designImageUrl = $page.url.searchParams.get('design') || '';
+		designId = $page.url.searchParams.get('designId') || null;
 
 		if (!templateId || !designImageUrl) {
 			alert('Missing template or design. Please start over.');
@@ -162,6 +169,7 @@
 				body: JSON.stringify({
 					templateId: template.id,
 					designImageUrl,
+					designId: designId,
 					placement: {
 						category: outfitCategory,
 						x: designX,
@@ -174,12 +182,9 @@
 
 			if (response.ok) {
 				const data = await response.json();
-				// Download the PDF
-				window.open(data.pdfUrl, '_blank');
-				// Optionally navigate to portfolio
-				setTimeout(() => {
-					window.location.href = '/portfolio';
-				}, 1000);
+				generatedPdfUrl = data.pdfUrl;
+				generatedProjectId = data.projectId;
+				showSuccessModal = true;
 			} else {
 				const error = await response.json();
 				alert(error.message || 'Failed to generate PDF');
@@ -189,6 +194,16 @@
 		} finally {
 			generating = false;
 		}
+	}
+
+	function downloadPDF() {
+		if (generatedPdfUrl) {
+			window.open(generatedPdfUrl, '_blank');
+		}
+	}
+
+	function goToPortfolio() {
+		window.location.href = '/portfolio';
 	}
 </script>
 
@@ -376,6 +391,80 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Success Modal -->
+{#if showSuccessModal}
+	<div class="modal modal-open">
+		<div class="modal-box max-w-md">
+			<div class="text-center py-4">
+				<div class="text-6xl mb-4">🎉</div>
+				<h3 class="font-bold text-2xl mb-2">Paper Doll Created!</h3>
+				<p class="text-gray-600 mb-6">Your printable paper doll is ready to download!</p>
+
+				<div class="flex flex-col gap-3">
+					<button class="btn btn-primary btn-lg" onclick={downloadPDF}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+							/>
+						</svg>
+						Download PDF
+					</button>
+
+					{#if generatedProjectId}
+						<button
+							class="btn btn-outline"
+							onclick={() => {
+								showShareModal = true;
+								showSuccessModal = false;
+							}}
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+								/>
+							</svg>
+							Share to Circle
+						</button>
+					{/if}
+
+					<button class="btn btn-ghost" onclick={goToPortfolio}>Go to Portfolio</button>
+				</div>
+			</div>
+		</div>
+		<div class="modal-backdrop bg-black bg-opacity-50"></div>
+	</div>
+{/if}
+
+<!-- Share Modal -->
+{#if showShareModal && generatedProjectId}
+	<ShareToCircleModal
+		itemType="dollProject"
+		itemId={generatedProjectId}
+		onclose={() => {
+			showShareModal = false;
+			goToPortfolio();
+		}}
+	/>
+{/if}
 
 <style>
 	.btn.btn-primary {
