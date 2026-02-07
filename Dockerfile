@@ -4,7 +4,7 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies for canvas and other native modules
+# Install build dependencies for canvas, sharp, and other native modules
 RUN apk add --no-cache \
     python3 \
     make \
@@ -13,7 +13,8 @@ RUN apk add --no-cache \
     jpeg-dev \
     pango-dev \
     giflib-dev \
-    pixman-dev
+    pixman-dev \
+    vips-dev
 
 # Copy package files
 COPY package*.json ./
@@ -30,7 +31,7 @@ RUN npm run build
 # Stage 2: Production image with Node.js + MySQL
 FROM node:18-bullseye
 
-# Install MySQL server (default-mysql-server for Debian), nginx, supervisor
+# Install MySQL server (default-mysql-server for Debian), nginx, supervisor, and runtime dependencies
 RUN apt-get update && apt-get install -y \
     default-mysql-server \
     default-mysql-client \
@@ -42,6 +43,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo \
     libpango-1.0-0 \
     libgif7 \
+    libvips42 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
