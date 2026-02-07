@@ -9,8 +9,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **V1 Theme:** Draw it → digitize it → make a printable paper doll (PDF)
 **Primary goal:** A delightful, safe creative flow that works great on tablets and laptops.
 
-**Current Status:** Phase 2 Complete (Paper Doll System + PDF Generation)
-**Next Phase:** Authentication + Database Integration
+**Current Status:** Phase 3 Complete (Authentication + Database Integration + Catalog Migration)
+**Next Phase:** Sharing + Circles (Phase 5)
 
 ---
 
@@ -72,21 +72,21 @@ Wrigs Fashion is a web app where kids can:
 ---
 
 ## 4) MVP Feature Set (Ship List)
-**Must-have for V1:**
-- Auth (simple): email magic link OR username+password (pick easiest)
-- Upload image
-- Crop/rotate + cleanup pipeline
-- Basic coloring/pattern overlay
-- Paper doll template placement
-- PDF export (Letter + A4)
-- Portfolio CRUD (create/list/view/delete)
-- Basic Circles (invite-only) + sharing
-- Deploy cheaply (single web app + managed DB + object storage)
+**Completed for V1:**
+- ✅ Auth: Better Auth with email/password
+- ✅ Upload image with drag-and-drop
+- ✅ Crop/rotate + cleanup pipeline
+- ✅ Basic coloring/pattern overlay
+- ✅ Paper doll template placement
+- ✅ PDF export (Letter + A4)
+- ✅ Portfolio CRUD (create/list/view/delete)
+- ✅ Multiple doll body types (3 body types)
+- ✅ More poses (2 poses)
+- ✅ Achievement badges and stats
 
-**Nice-to-have if time:**
-- ✅ Multiple doll body types (DONE: 3 body types)
-- ✅ More poses (DONE: 2 poses)
-- Sticker/badge rewards
+**Remaining for V1:**
+- 📋 Basic Circles (invite-only) + sharing
+- 📋 Deploy to production (single web app + managed DB + object storage)
 
 ---
 
@@ -94,16 +94,17 @@ Wrigs Fashion is a web app where kids can:
 **Web stack:**
 - SvelteKit (with Svelte 5 runes) + TypeScript
 - TailwindCSS + DaisyUI (Lemon Meringue theme)
-- Drizzle ORM + MySQL (schema defined, not yet connected)
-- Auth: Lucia Auth (planned, not yet implemented)
-- Object storage: Local static files (production TBD: Supabase Storage or R2)
+- Drizzle ORM + MySQL (✅ connected and operational)
+- Auth: Better Auth (✅ implemented with email/password)
+- Object storage: Local static files (production TBD: Cloudflare R2)
 - Image processing: Sharp.js (server-side)
 - PDF generation: PDFKit (✅ implemented)
 - Deployment: adapter-node (Node.js server)
 
 **Key Architecture Decisions:**
-- Session-based auth (not cookies) via sessionId stored in DB
-- Catalogs use sessionId (not userId) to support pre-auth usage
+- Better Auth with email/password authentication (cookie-based sessions)
+- Dual-mode system: sessionId for anonymous users, userId for authenticated users
+- Automatic catalog migration from sessionId to userId on registration
 - Image processing server-side (2-4 seconds, 10MB limit)
 - Synchronous API endpoints (no background jobs yet)
 - Canvas-based editor for real-time drawing
@@ -256,18 +257,23 @@ Use `nanoid()` for all IDs (URL-safe, collision-resistant, shorter than UUID)
    - Share catalogs via unique slugs
    - Session-based (works without auth)
 
-4) 📋 **Phase 3:** Authentication + Database Integration (NEXT)
-   - Lucia Auth setup
-   - User registration/login
-   - Connect to MySQL database
-   - Migrate session-based catalogs to user accounts
+4) ✅ **Phase 3:** Authentication + Database Integration (DONE)
+   - Better Auth setup with email/password
+   - User registration/login/logout pages
+   - MySQL database connected via Drizzle ORM
+   - Automatic catalog migration from sessionId to userId on signup
+   - Auth-aware UI with conditional navigation
+   - Protected routes with server-side auth guards
+   - Onboarding flow for new users
 
-5) 📋 **Phase 4:** Portfolio CRUD
-   - Portfolio listing page
-   - Design management (view, delete, re-download)
-   - Link uploaded designs to user accounts
+5) ✅ **Phase 4:** Portfolio CRUD (DONE)
+   - Portfolio listing page with grid/list views
+   - Design management (view, edit, delete, download)
+   - Create paper dolls from designs
+   - Achievement badges and stats
+   - Empty state with call-to-action
 
-6) 📋 **Phase 5:** Sharing + Circles
+6) 📋 **Phase 5:** Sharing + Circles (NEXT)
    - Invite-only circles
    - Share designs/dolls to circles
    - Reactions + preset compliments
@@ -388,17 +394,37 @@ DATABASE_URL="mysql://user:pass@localhost:3306/wrigs_fashion"
 **Prerequisites:**
 - Node.js 18+ (use nvm: `nvm install 18 && nvm use 18`)
 - npm package manager
+- MySQL 8.0+ (required for authentication and portfolio features)
 
 **Setup Steps:**
 ```bash
 # 1. Install dependencies
 npm install
 
-# 2. Configure environment variables (OPTIONAL - app works without DB)
-# Only needed if connecting to MySQL database
-echo 'DATABASE_URL="mysql://user:pass@localhost:3306/wrigs_fashion"' > .env
+# 2. Set up MySQL database
+# Option A: Using Docker (recommended)
+docker run --name wrigs-mysql -e MYSQL_ROOT_PASSWORD=root \
+  -e MYSQL_DATABASE=wrigs_fashion -e MYSQL_USER=wrigs_user \
+  -e MYSQL_PASSWORD=password -p 3306:3306 -d mysql:8.0
 
-# 3. Start development server
+# Option B: Local MySQL installation
+mysql -u root -p
+CREATE DATABASE wrigs_fashion;
+CREATE USER 'wrigs_user'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON wrigs_fashion.* TO 'wrigs_user'@'localhost';
+FLUSH PRIVILEGES;
+
+# 3. Configure environment variables (REQUIRED for auth)
+cp .env.example .env
+# Edit .env with your database credentials and generate AUTH_SECRET
+# Generate AUTH_SECRET: openssl rand -hex 32
+
+# 4. Run database migrations
+npm run db:push  # For development (fast)
+# OR
+npm run db:generate && npm run db:migrate  # For production (versioned)
+
+# 5. Start development server
 npm run dev
 # App runs on http://localhost:5173 (default Vite port)
 # Or http://localhost:3001 if 5173 is in use
@@ -408,9 +434,9 @@ npm run dev
 - ✅ Phase 1: Upload + Crop + Processing + Editor
 - ✅ Phase 2: Paper Doll Templates + PDF Generation
 - ✅ Phase 2.5: Catalog System (bonus feature)
-- 📋 Phase 3 (NEXT): Authentication + Database Integration
-- 📋 Phase 4: Portfolio CRUD + User Management
-- 📋 Phase 5: Sharing + Circles
+- ✅ Phase 3: Authentication + Database Integration
+- ✅ Phase 4: Portfolio CRUD + User Management
+- 📋 Phase 5 (NEXT): Sharing + Circles
 
 ### Common Commands
 
@@ -537,6 +563,18 @@ npm install
 ### API Routes (Implemented)
 ```
 /src/routes/api/
+  ✅ auth/register/+server.ts
+     - POST: Create user account with Better Auth
+     - Migrates anonymous catalogs to user account
+     - Returns: userId, session cookie
+
+  ✅ auth/login/+server.ts
+     - POST: Authenticate user
+     - Returns: session cookie
+
+  ✅ auth/logout/+server.ts
+     - POST: Destroy session, clear cookies
+
   ✅ upload/+server.ts
      - POST: Upload image, process with Sharp.js
      - Returns: original + cleaned image URLs
@@ -547,7 +585,7 @@ npm install
      - Returns: PDF download URL
 
   ✅ catalogs/+server.ts
-     - GET: List catalogs for session
+     - GET: List catalogs for session/user
      - POST: Create new catalog
 
   ✅ catalogs/[id]/+server.ts
@@ -565,7 +603,12 @@ npm install
   ✅ catalogs/[id]/share/+server.ts
      - POST: Generate shareable link
 
-  📋 designs/ - Planned (needs auth)
+  ✅ designs/+server.ts
+     - POST: Save design to portfolio (auth required)
+
+  ✅ designs/[id]/+server.ts
+     - DELETE: Delete design from portfolio (auth required)
+
   📋 circles/ - Planned (Phase 5)
 ```
 
@@ -573,7 +616,7 @@ npm install
 ```
 /src/routes/
   ✅ +page.svelte - Homepage with hero section
-  ✅ +layout.svelte - Navigation + footer
+  ✅ +layout.svelte - Navigation + footer (auth-aware)
   ✅ upload/+page.svelte - Upload + freeform crop tool
   ✅ editor/+page.svelte - Canvas editor with 6 tools
   ✅ doll-builder/+page.svelte - Template selection
@@ -581,7 +624,10 @@ npm install
   ✅ catalogs/+page.svelte - Catalog listing
   ✅ catalogs/[id]/+page.svelte - Catalog canvas editor
   ✅ catalogs/share/[shareSlug]/+page.svelte - Public catalog view
-  📋 portfolio/+page.svelte - Portfolio (placeholder, needs implementation)
+  ✅ portfolio/+page.svelte - Portfolio grid with stats (auth required)
+  ✅ auth/register/+page.svelte - User registration
+  ✅ auth/login/+page.svelte - User login
+  ✅ onboarding/+page.svelte - Post-signup onboarding flow
 ```
 
 ### Components (Implemented)
@@ -630,24 +676,246 @@ Uses Claude Code Review plugin to automatically review PR changes.
 
 ---
 
-## 18) Session Management (Current Implementation)
+## 18) Authentication System (Better Auth Implementation)
 
-**Important:** The app currently uses session-based access WITHOUT authentication.
+**Status:** ✅ IMPLEMENTED
 
-**How it works:**
-- `sessionId` generated on first visit (stored in `src/lib/server/session.ts`)
-- Catalogs table uses `sessionId` (not `userId`)
-- This allows users to create catalogs before signing up
+**Authentication Provider:** Better Auth (v1.4.18)
+- Email/password authentication
+- Cookie-based sessions (30-day expiry)
+- Server-side session validation via `hooks.server.ts`
+- No email verification in V1 (optional for V2)
 
-**Migration path (Phase 3):**
-1. Add authentication with Lucia Auth
-2. Migrate session-based catalogs to user accounts
-3. Keep sessionId for anonymous users (optional)
-4. Link catalogs to userId on login/signup
+**Key Files:**
+- `/src/lib/server/auth/config.ts` - Better Auth configuration
+- `/src/lib/server/auth/guards.ts` - Route protection utilities
+- `/src/lib/server/auth/validation.ts` - Input validation
+- `/src/hooks.server.ts` - Global auth middleware
+- `/src/app.d.ts` - TypeScript types for `event.locals.user`
+
+**Auth Flow:**
+1. User registers at `/auth/register`
+2. Better Auth creates user + hashes password
+3. Auto-login after registration
+4. Session cookie set (`wrigs_session`)
+5. Anonymous catalogs migrated to user account
+6. Redirect to `/onboarding`
+
+**Dual-Mode System (Anonymous + Authenticated):**
+- **Anonymous users:** Use `sessionId` cookie for catalog access
+- **Authenticated users:** Use `userId` from Better Auth session
+- **On signup:** Automatic migration of sessionId catalogs to userId
+
+**Protected Routes:**
+- `/portfolio` - Requires authentication
+- `/onboarding` - Requires authentication
+- Other routes: Public (upload, editor, doll-builder work anonymously)
+
+**Environment Variables:**
+```bash
+# Required for production
+AUTH_SECRET="your_32_character_random_secret_key"
+DATABASE_URL="mysql://user:pass@host:port/db"
+PUBLIC_APP_URL="https://yourdomain.com"
+BETTER_AUTH_URL="https://yourdomain.com"  # Optional, defaults to PUBLIC_APP_URL
+```
+
+**Database Schema (Better Auth Required Tables):**
+- `users` - User accounts (id, email, password, name, image, role)
+- `sessions` - Active sessions (id, userId, expiresAt, token)
+- `accounts` - OAuth accounts (not used in V1, reserved for V2)
+- `verifications` - Email verification tokens (not used in V1)
+
+**Session Migration Service:**
+Location: `/src/lib/server/services/catalog-migration.ts`
+- Migrates catalogs from sessionId to userId on registration
+- Preserves catalog history for new users
+- Returns count of migrated catalogs
 
 ---
 
-## 19) Critical Implementation Notes
+## 19) Better Auth Implementation Guide
+
+### Why Better Auth?
+Chosen over Lucia Auth (deprecated) and NextAuth for:
+- Modern, actively maintained (v1.4.18)
+- Built-in Drizzle ORM adapter
+- Simple email/password authentication
+- Cookie-based sessions out of the box
+- Easy MySQL integration
+- TypeScript-first design
+
+### Setup Process (Already Completed)
+
+**1. Install Better Auth:**
+```bash
+npm install better-auth
+```
+
+**2. Database Schema:**
+Better Auth requires 4 tables (already in `schema.ts`):
+- `users` - User accounts
+- `sessions` - Active sessions
+- `accounts` - OAuth providers (reserved for V2)
+- `verifications` - Email verification tokens (reserved for V2)
+
+**3. Auth Configuration:**
+File: `/src/lib/server/auth/config.ts`
+```typescript
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+
+export const auth = betterAuth({
+  database: drizzleAdapter(getDb(), {
+    provider: 'mysql',
+    schema: { user, session, account, verification }
+  }),
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: false, // V1: disabled
+    minPasswordLength: 8
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 30 // 30 days
+  },
+  secret: env.AUTH_SECRET,
+  baseURL: env.PUBLIC_APP_URL
+});
+```
+
+**4. Global Auth Middleware:**
+File: `/src/hooks.server.ts`
+```typescript
+export const handle: Handle = async ({ event, resolve }) => {
+  const session = await auth.api.getSession({
+    headers: event.request.headers
+  });
+
+  if (session) {
+    event.locals.user = {
+      id: session.user.id,
+      email: session.user.email,
+      nickname: session.user.name,
+      // ... other fields
+    };
+  }
+
+  return await resolve(event);
+};
+```
+
+**5. API Endpoints Pattern:**
+All auth endpoints follow this pattern:
+
+```typescript
+// Create a proper Request for Better Auth
+const authRequest = new Request('http://localhost/api/auth/sign-up/email', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, password, name })
+});
+
+// Call Better Auth handler
+const authResponse = await auth.handler(authRequest);
+const data = await authResponse.json();
+
+// Extract and set session cookie
+const setCookieHeader = authResponse.headers.get('set-cookie');
+// Parse and set cookie manually in SvelteKit
+```
+
+**6. Route Protection:**
+File: `/src/lib/server/auth/guards.ts`
+```typescript
+export function requireAuth(locals: App.Locals) {
+  if (!locals.user) {
+    throw redirect(303, '/auth/login');
+  }
+  return locals.user;
+}
+```
+
+Usage in `+page.server.ts`:
+```typescript
+export const load: PageServerLoad = async ({ locals }) => {
+  const user = requireAuth(locals);
+  // ... fetch user-specific data
+};
+```
+
+### Key Differences from Other Auth Libraries
+
+**Better Auth vs Lucia Auth:**
+- Lucia is deprecated (no longer maintained)
+- Better Auth has built-in Drizzle adapter
+- Better Auth handles Request/Response pattern natively
+
+**Better Auth vs NextAuth:**
+- Better Auth is framework-agnostic
+- Simpler configuration for basic auth
+- Native TypeScript support
+- Better Drizzle ORM integration
+
+### Common Patterns
+
+**Accessing User in Server Code:**
+```typescript
+// In +page.server.ts
+export const load = async ({ locals }) => {
+  if (locals.user) {
+    // User is authenticated
+    const userId = locals.user.id;
+  }
+};
+```
+
+**Accessing User in API Routes:**
+```typescript
+// In +server.ts
+export const POST = async ({ locals }) => {
+  if (!locals.user) {
+    throw error(401, 'Unauthorized');
+  }
+  const userId = locals.user.id;
+};
+```
+
+**Client-Side Auth State:**
+Not directly available - use server load functions to pass user data to pages.
+
+### Troubleshooting
+
+**Issue: Session not persisting**
+- Check AUTH_SECRET is set in `.env`
+- Verify cookie is being set (check browser DevTools)
+- Ensure `baseURL` matches your app URL
+
+**Issue: "User not found" after registration**
+- Check database migrations ran successfully
+- Verify Better Auth created the user in `users` table
+- Check `users.name` field is set (not null)
+
+**Issue: Cookie not setting in SvelteKit**
+- Must manually parse and set cookie from Better Auth response
+- Use `cookies.set()` in SvelteKit API routes
+- See `/src/routes/api/auth/register/+server.ts` for reference
+
+---
+
+## 20) Critical Implementation Notes
+
+### Authentication & Session Management
+**Dual-Mode Architecture:**
+- Anonymous users: `sessionId` cookie (generated on first visit)
+- Authenticated users: Better Auth session cookie + `userId`
+- Catalogs: Support both `sessionId` and `userId` for seamless migration
+
+**Catalog Migration on Signup:**
+Location: `/src/lib/server/services/catalog-migration.ts`
+- Automatically runs on user registration
+- Migrates all anonymous catalogs to user account
+- Returns count of migrated catalogs
+- User sees confirmation message
 
 ### Image Processing Pipeline
 **Location:** `src/routes/api/upload/+server.ts`
@@ -715,30 +983,35 @@ Pattern overlays: dots, stripes, stars, hearts, sparkles
 
 ---
 
-## 20) Known Issues & TODOs
+## 21) Known Issues & TODOs
 
 ### Remove Before Production
 - ColorCustomizer component in `+layout.svelte` (design tool, not user feature)
 
-### Database Not Connected
-- Schema defined but no migrations run
-- All data currently in-memory or static files
-- Phase 3 will connect MySQL and persist data
+### Production Readiness Tasks
+- ❌ Migrate file storage from `/static` to Cloudflare R2 or AWS S3
+- ❌ Set up managed MySQL database (PlanetScale, Railway, or AWS RDS)
+- ❌ Configure AUTH_SECRET with secure random string
+- ❌ Enable HTTPS and set `useSecureCookies: true` in auth config
+- ❌ Add email verification (currently disabled for V1)
+- ❌ Set up error tracking (Sentry or similar)
+- ❌ Add rate limiting to auth endpoints
 
-### Missing Features
-- ❌ Authentication (Phase 3)
-- ❌ Portfolio CRUD (Phase 4)
-- ❌ User management (Phase 4)
-- ❌ Sharing circles (Phase 5)
-- ❌ Reactions/compliments (Phase 5)
+### Missing Features (Phase 5)
+- ❌ Sharing circles (invite-only groups)
+- ❌ Share designs to circles
+- ❌ Reactions/compliments on shared items
+- ❌ Circle management UI
 
 ### File Storage Strategy
-Currently: Local static files in `/static/uploads/` and `/static/pdfs/`
-Production: Needs object storage (Supabase Storage, Cloudflare R2, or AWS S3)
+**Current (Development):** Local static files in `/static/uploads/` and `/static/pdfs/`
+**Production Plan:** Cloudflare R2 (S3-compatible) with CDN
+- Environment variables already defined in `.env.example`
+- Migration path: Update image URLs from `/static/` to R2 public URLs
 
 ---
 
-## 21) Quick Reference
+## 22) Quick Reference
 
 ### Key Files to Know
 
@@ -747,33 +1020,61 @@ Production: Needs object storage (Supabase Storage, Cloudflare R2, or AWS S3)
 - `/src/routes/editor/+page.svelte` - Canvas editor with 6 tools (560 lines)
 - `/src/routes/doll-builder/+page.svelte` - Template selection (247 lines)
 - `/src/routes/doll-builder/place/+page.svelte` - Design placement (367 lines)
+- `/src/routes/portfolio/+page.svelte` - Portfolio grid with stats (332 lines)
+- `/src/routes/auth/register/+page.svelte` - Registration form (234 lines)
+- `/src/routes/auth/login/+page.svelte` - Login form
+- `/src/routes/onboarding/+page.svelte` - Post-signup onboarding
 
 **API Endpoints:**
+- `/src/routes/api/auth/register/+server.ts` - User registration + catalog migration (125 lines)
+- `/src/routes/api/auth/login/+server.ts` - User login
+- `/src/routes/api/auth/logout/+server.ts` - Session destruction
 - `/src/routes/api/upload/+server.ts` - Image processing (113 lines)
 - `/src/routes/api/generate-pdf/+server.ts` - PDF generation (40 lines)
 - `/src/routes/api/catalogs/` - Catalog CRUD endpoints
+- `/src/routes/api/designs/` - Design CRUD endpoints
+
+**Authentication:**
+- `/src/lib/server/auth/config.ts` - Better Auth configuration (48 lines)
+- `/src/lib/server/auth/guards.ts` - Route protection utilities
+- `/src/lib/server/auth/validation.ts` - Input validation
+- `/src/hooks.server.ts` - Global auth middleware (32 lines)
 
 **Services:**
 - `/src/lib/services/pdf-generator.ts` - PDFKit service (378 lines)
-- `/src/lib/server/session.ts` - Session management
+- `/src/lib/server/services/catalog-migration.ts` - Catalog migration on signup
+- `/src/lib/server/session.ts` - Anonymous session management
 - `/src/lib/data/doll-templates.ts` - Template metadata (184 lines)
 
 **Database:**
 - `/src/lib/server/db/schema.ts` - Drizzle schema (261 lines)
-- `/src/lib/server/db/index.ts` - DB client
+- `/src/lib/server/db/index.ts` - DB client (20 lines)
 - `/drizzle.config.ts` - Drizzle configuration
 
 **Config:**
 - `/svelte.config.js` - SvelteKit config (adapter-node)
 - `/tailwind.config.js` - Tailwind + DaisyUI (Lemon Meringue theme)
 - `/package.json` - Dependencies and scripts
+- `/.env.example` - Environment variable template
 
 ### User Flow (Complete Path)
+
+**Anonymous User Flow (No Account):**
 1. **Upload:** `/upload` → drag/drop image → freeform crop → process
 2. **Edit:** `/editor` → use 6 tools → apply patterns → save PNG
 3. **Paper Doll:** Click "Create Paper Doll" → `/doll-builder` → select template
 4. **Place:** `/doll-builder/place` → position design → adjust scale → choose paper size
 5. **Download:** Click "Generate PDF" → download 2-page printable
+6. **Catalogs:** Create fashion collections with sessionId (migrated on signup)
+
+**Authenticated User Flow (With Account):**
+1. **Register:** `/auth/register` → email + password + nickname → auto-login
+2. **Onboarding:** `/onboarding` → welcome message → link to upload
+3. **Upload:** `/upload` → drag/drop image → freeform crop → process → save to portfolio
+4. **Portfolio:** `/portfolio` → view all designs → edit, delete, download, or make paper doll
+5. **Edit:** Click "Edit" from portfolio → `/editor` → use 6 tools → save updates
+6. **Paper Doll:** Click "Make Paper Doll" → `/doll-builder` → select template → place → generate PDF
+7. **Catalogs:** Create fashion collections linked to user account (persistent across sessions)
 
 ### Common Tasks
 
@@ -817,7 +1118,7 @@ npm run db:migrate
 
 ---
 
-## 22) Open Questions (Track but don't block)
+## 23) Open Questions (Track but don't block)
 - Age gating / COPPA compliance approach (V1 can avoid collecting personal data)
 - Parent dashboard (V2)
 - Advanced background removal model (V2)
