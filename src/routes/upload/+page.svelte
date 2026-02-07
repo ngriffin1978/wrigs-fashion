@@ -267,11 +267,17 @@
 			const data = await response.json();
 
 			if (!response.ok) {
-				throw new Error(data.error || 'Upload failed');
+				// Show detailed error message if available
+				const errorMessage = data.details
+					? `${data.error}: ${data.details}`
+					: data.error || 'Upload failed';
+				console.error('Upload error:', data);
+				throw new Error(errorMessage);
 			}
 
 			uploadResult = data;
 		} catch (err) {
+			console.error('Upload exception:', err);
 			error = err instanceof Error ? err.message : 'Upload failed';
 		} finally {
 			isUploading = false;

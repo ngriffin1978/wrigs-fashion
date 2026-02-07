@@ -10,12 +10,15 @@ const MAX_DIMENSION = 2000;
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
+		console.log('Upload request received');
 		const formData = await request.formData();
 		const file = formData.get('file') as File;
 
 		if (!file) {
 			return json({ error: 'No file provided' }, { status: 400 });
 		}
+
+		console.log(`Processing file: ${file.name}, type: ${file.type}, size: ${file.size} bytes`);
 
 		// Validate file type
 		const allowedTypes = ['image/jpeg', 'image/png', 'image/heic'];
@@ -30,19 +33,27 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Ensure upload directory exists
 		if (!existsSync(UPLOAD_DIR)) {
+			console.log(`Creating upload directory: ${UPLOAD_DIR}`);
 			await mkdir(UPLOAD_DIR, { recursive: true });
 		}
 
 		// Convert file to buffer
+		console.log('Converting file to buffer...');
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
+		console.log(`Buffer created: ${buffer.length} bytes`);
 
 		// Generate unique filename
 		const fileId = nanoid(10);
 		const originalPath = path.join(UPLOAD_DIR, `${fileId}-original.png`);
 		const cleanedPath = path.join(UPLOAD_DIR, `${fileId}-cleaned.png`);
 
+		console.log(`Generated file ID: ${fileId}`);
+		console.log(`Original path: ${originalPath}`);
+		console.log(`Cleaned path: ${cleanedPath}`);
+
 		// Save original (converted to PNG)
+		console.log('Processing original image with Sharp...');
 		await sharp(buffer)
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
@@ -50,9 +61,13 @@ export const POST: RequestHandler = async ({ request }) => {
 			})
 			.png()
 			.toFile(originalPath);
+		console.log('Original image saved successfully');
 
 		// Process image: Remove background, enhance drawing colors, reduce color palette
+		console.log('Starting image processing pipeline...');
+
 		// Step 1: Boost brightness aggressively to blow out the background
+		console.log('Step 1: Applying brightness and contrast adjustments...');
 		const processed = sharp(buffer)
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
@@ -68,17 +83,20 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Step 2: Reduce color palette (posterize) for better wand tool performance
 		// This consolidates similar colors into distinct groups
+		console.log('Step 2: Converting to sRGB color space...');
 		const processedBuffer = await processed
 			.toColourspace('srgb')
 			.toBuffer();
 
 		// Step 3: Apply color quantization to reduce to ~32 colors
 		// This makes the wand tool much more effective
+		console.log('Step 3: Quantizing colors (reducing to 32 colors)...');
 		const quantized = await sharp(processedBuffer)
 			.png({ palette: true, colours: 32, dither: 0 }) // Reduce to 32 colors, no dithering
 			.toBuffer();
 
 		// Step 4: Add to neutral background with padding
+		console.log('Step 4: Adding background and padding...');
 		await sharp(quantized)
 			.flatten({ background: '#f8f8f8' }) // Light gray neutral background
 			.extend({
@@ -90,7 +108,9 @@ export const POST: RequestHandler = async ({ request }) => {
 			})
 			.png()
 			.toFile(cleanedPath);
+		console.log('Image processing completed successfully');
 
+		console.log('Upload successful, returning response');
 		return json({
 			success: true,
 			fileId,
@@ -101,6 +121,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		});
 	} catch (error) {
 		console.error('Upload error:', error);
+		console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+
 		return json(
 			{
 				error: 'Failed to process image',
