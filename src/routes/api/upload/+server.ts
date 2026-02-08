@@ -17,10 +17,37 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: 'No file provided' }, { status: 400 });
 		}
 
-		// Validate file type
-		const allowedTypes = ['image/jpeg', 'image/png', 'image/heic'];
-		if (!allowedTypes.includes(file.type)) {
-			return json({ error: 'Invalid file type. Please upload JPG, PNG, or HEIC' }, { status: 400 });
+		// Validate file type - support various HEIC/HEIF MIME types from different devices
+		const allowedTypes = [
+			'image/jpeg',
+			'image/jpg',
+			'image/png',
+			'image/heic',
+			'image/heif',
+			'image/heic-sequence',
+			'image/heif-sequence'
+		];
+
+		// Get file extension as fallback (iOS sometimes sends empty MIME type)
+		const fileName = file.name.toLowerCase();
+		const hasValidExtension =
+			fileName.endsWith('.jpg') ||
+			fileName.endsWith('.jpeg') ||
+			fileName.endsWith('.png') ||
+			fileName.endsWith('.heic') ||
+			fileName.endsWith('.heif');
+
+		// Accept if either MIME type is valid OR extension is valid (handles iOS edge cases)
+		const isValidType = allowedTypes.includes(file.type) || (file.type === '' && hasValidExtension);
+
+		if (!isValidType) {
+			return json(
+				{
+					error: 'Invalid file type. Please upload JPG, PNG, or HEIC',
+					debug: { mimeType: file.type, fileName: file.name }
+				},
+				{ status: 400 }
+			);
 		}
 
 		// Validate file size (10MB)

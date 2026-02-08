@@ -16,10 +16,29 @@
 	let selectionPath: { x: number; y: number }[] = $state([]);
 
 	const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-	const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/heic'];
+	const ALLOWED_TYPES = [
+		'image/jpeg',
+		'image/jpg',
+		'image/png',
+		'image/heic',
+		'image/heif',
+		'image/heic-sequence',
+		'image/heif-sequence'
+	];
 
 	function validateFile(file: File): string | null {
-		if (!ALLOWED_TYPES.includes(file.type)) {
+		// Check file extension as fallback (iOS sometimes sends empty MIME type)
+		const fileName = file.name.toLowerCase();
+		const hasValidExtension =
+			fileName.endsWith('.jpg') ||
+			fileName.endsWith('.jpeg') ||
+			fileName.endsWith('.png') ||
+			fileName.endsWith('.heic') ||
+			fileName.endsWith('.heif');
+
+		const isValidType = ALLOWED_TYPES.includes(file.type) || (file.type === '' && hasValidExtension);
+
+		if (!isValidType) {
 			return 'Please upload a JPG, PNG, or HEIC image';
 		}
 		if (file.size > MAX_FILE_SIZE) {
@@ -326,7 +345,7 @@
 						id="file-upload"
 						type="file"
 						class="hidden"
-						accept="image/jpeg,image/png,image/heic"
+						accept="image/jpeg,image/jpg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif"
 						onchange={handleFileSelect}
 					/>
 				</label>
