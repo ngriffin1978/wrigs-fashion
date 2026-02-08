@@ -44,6 +44,9 @@ RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libgif7 \
     libvips42 \
+    libheif1 \
+    libde265-0 \
+    libx265-192 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

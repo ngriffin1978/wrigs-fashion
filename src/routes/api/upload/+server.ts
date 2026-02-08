@@ -64,13 +64,25 @@ export const POST: RequestHandler = async ({ request }) => {
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 
+		// Detect if file is HEIC/HEIF format (iOS photos)
+		const isHeic = fileName.endsWith('.heic') ||
+		               fileName.endsWith('.heif') ||
+		               file.type === 'image/heic' ||
+		               file.type === 'image/heif' ||
+		               file.type === 'image/heic-sequence' ||
+		               file.type === 'image/heif-sequence';
+
 		// Generate unique filename
 		const fileId = nanoid(10);
 		const originalPath = path.join(UPLOAD_DIR, `${fileId}-original.png`);
 		const cleanedPath = path.join(UPLOAD_DIR, `${fileId}-cleaned.png`);
 
+		// Create Sharp instance with format hint for HEIC files
+		// This is critical because Sharp's HEIF loader only recognizes .avif by default
+		const sharpOptions = isHeic ? { pages: -1 } : {};
+
 		// Save original (converted to PNG)
-		await sharp(buffer)
+		await sharp(buffer, sharpOptions)
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
 				withoutEnlargement: true
@@ -80,7 +92,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Process image: Remove background, enhance drawing colors, reduce color palette
 		// Step 1: Boost brightness aggressively to blow out the background
-		const processed = sharp(buffer)
+		const processed = sharp(buffer, sharpOptions)
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
 				withoutEnlargement: true
@@ -128,10 +140,20 @@ export const POST: RequestHandler = async ({ request }) => {
 		});
 	} catch (error) {
 		console.error('Upload error:', error);
+
+		// Provide specific error message for HEIC/HEIF format issues
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+		const isHeicError = errorMessage.toLowerCase().includes('heif') ||
+		                    errorMessage.toLowerCase().includes('heic') ||
+		                    errorMessage.toLowerCase().includes('unsupported');
+
 		return json(
 			{
-				error: 'Failed to process image',
-				details: error instanceof Error ? error.message : 'Unknown error'
+				error: isHeicError
+					? 'Failed to process HEIC/HEIF image. This format may not be fully supported. Please try converting to JPG or PNG first.'
+					: 'Failed to process image',
+				details: errorMessage,
+				fileName: formData.get('file')?.name || 'unknown'
 			},
 			{ status: 500 }
 		);
