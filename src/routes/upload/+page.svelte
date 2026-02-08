@@ -286,12 +286,17 @@
 			const data = await response.json();
 
 			if (!response.ok) {
-				throw new Error(data.error || 'Upload failed');
+				// Show detailed error message with workaround if available
+				const errorMessage = data.details
+					? `${data.error}\n\n${data.details}`
+					: data.error || 'Upload failed';
+				throw new Error(errorMessage);
 			}
 
 			uploadResult = data;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Upload failed';
+			console.error('Upload error:', err);
 		} finally {
 			isUploading = false;
 		}
@@ -356,7 +361,7 @@
 						<div class="alert alert-error">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
-								class="stroke-current shrink-0 h-6 w-6"
+								class="stroke-current shrink-0 h-6 w-6 self-start mt-1"
 								fill="none"
 								viewBox="0 0 24 24"
 							>
@@ -367,7 +372,7 @@
 									d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
 								/>
 							</svg>
-							<span>{error}</span>
+							<div class="whitespace-pre-line">{error}</div>
 						</div>
 					</div>
 				{/if}
