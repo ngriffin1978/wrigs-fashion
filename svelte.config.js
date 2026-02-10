@@ -11,7 +11,11 @@ const config = {
 		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
 		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
-		adapter: adapter()
+		adapter: adapter({
+			// Allow larger file uploads for image processing (iOS photos are typically 2-5MB)
+			// Set to 15MB to accommodate 10MB max upload size + overhead
+			bodySize: 15 * 1024 * 1024 // 15MB in bytes
+		})
 	}
 };
 

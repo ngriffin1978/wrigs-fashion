@@ -40,6 +40,7 @@
 		"better-auth": "^1.4.18",
 		"canvas": "^3.2.1",
 		"drizzle-orm": "^0.45.1",
+		"heic-convert": "^2.1.0",
 		"mysql2": "^3.11.5",
 		"nanoid": "^5.0.4",
 		"pdfkit": "^0.17.2",

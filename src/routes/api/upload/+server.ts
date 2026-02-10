@@ -4,18 +4,28 @@ import { nanoid } from 'nanoid';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import heicConvert from 'heic-convert';
 
 const UPLOAD_DIR = 'static/uploads';
 const MAX_DIMENSION = 2000;
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
+		console.log('📤 Upload request received');
 		const formData = await request.formData();
 		const file = formData.get('file') as File;
 
 		if (!file) {
+			console.log('❌ No file provided in request');
 			return json({ error: 'No file provided' }, { status: 400 });
 		}
+
+		console.log('📋 File info:', {
+			name: file.name,
+			size: file.size,
+			type: file.type,
+			lastModified: file.lastModified
+		});
 
 		// Validate file type - support various HEIC/HEIF MIME types from different devices
 		const allowedTypes = [
@@ -40,7 +50,15 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Accept if either MIME type is valid OR extension is valid (handles iOS edge cases)
 		const isValidType = allowedTypes.includes(file.type) || (file.type === '' && hasValidExtension);
 
+		console.log('✅ Validation result:', {
+			isValidType,
+			mimeTypeMatched: allowedTypes.includes(file.type),
+			extensionMatched: hasValidExtension,
+			emptyMimeType: file.type === ''
+		});
+
 		if (!isValidType) {
+			console.log('❌ Invalid file type:', { mimeType: file.type, fileName: file.name });
 			return json(
 				{
 					error: 'Invalid file type. Please upload JPG, PNG, or HEIC',
@@ -52,17 +70,21 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Validate file size (10MB)
 		if (file.size > 10 * 1024 * 1024) {
+			console.log('❌ File too large:', file.size);
 			return json({ error: 'File size exceeds 10MB limit' }, { status: 400 });
 		}
 
 		// Ensure upload directory exists
 		if (!existsSync(UPLOAD_DIR)) {
+			console.log('📁 Creating upload directory');
 			await mkdir(UPLOAD_DIR, { recursive: true });
 		}
 
 		// Convert file to buffer
+		console.log('🔄 Converting file to buffer...');
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
+		console.log('✅ Buffer created:', buffer.length, 'bytes');
 
 		// Detect if file is HEIC/HEIF format (iOS photos)
 		const isHeic = fileName.endsWith('.heic') ||
@@ -72,17 +94,42 @@ export const POST: RequestHandler = async ({ request }) => {
 		               file.type === 'image/heic-sequence' ||
 		               file.type === 'image/heif-sequence';
 
+		console.log('🖼️ Image format detection:', { isHeic, fileName });
+
+		// Convert HEIC to JPEG if needed (server-side conversion for iOS compatibility)
+		let processBuffer = buffer;
+		if (isHeic) {
+			console.log('🔄 Converting HEIC to JPEG...');
+			try {
+				const jpegBuffer = await heicConvert({
+					buffer: buffer,
+					format: 'JPEG',
+					quality: 0.95
+				});
+				processBuffer = Buffer.from(jpegBuffer);
+				console.log('✅ HEIC converted to JPEG:', processBuffer.length, 'bytes');
+			} catch (heicError) {
+				console.error('❌ HEIC conversion failed:', heicError);
+				return json(
+					{
+						error: 'Failed to convert HEIC image. Please try converting to JPG or PNG first.',
+						details: heicError instanceof Error ? heicError.message : 'Unknown error'
+					},
+					{ status: 500 }
+				);
+			}
+		}
+
 		// Generate unique filename
 		const fileId = nanoid(10);
 		const originalPath = path.join(UPLOAD_DIR, `${fileId}-original.png`);
 		const cleanedPath = path.join(UPLOAD_DIR, `${fileId}-cleaned.png`);
 
-		// Create Sharp instance with format hint for HEIC files
-		// This is critical because Sharp's HEIF loader only recognizes .avif by default
-		const sharpOptions = isHeic ? { pages: -1 } : {};
+		console.log('📝 Generated file ID:', fileId);
+		console.log('🎨 Starting image processing with Sharp...');
 
 		// Save original (converted to PNG)
-		await sharp(buffer, sharpOptions)
+		await sharp(processBuffer)
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
 				withoutEnlargement: true
@@ -92,7 +139,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Process image: Remove background, enhance drawing colors, reduce color palette
 		// Step 1: Boost brightness aggressively to blow out the background
-		const processed = sharp(buffer, sharpOptions)
+		const processed = sharp(processBuffer)
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
 				withoutEnlargement: true
@@ -130,6 +177,12 @@ export const POST: RequestHandler = async ({ request }) => {
 			.png()
 			.toFile(cleanedPath);
 
+		console.log('✅ Upload successful!', {
+			fileId,
+			originalUrl: `/uploads/${fileId}-original.png`,
+			cleanedUrl: `/uploads/${fileId}-cleaned.png`
+		});
+
 		return json({
 			success: true,
 			fileId,
@@ -139,21 +192,15 @@ export const POST: RequestHandler = async ({ request }) => {
 			fileSize: file.size
 		});
 	} catch (error) {
-		console.error('Upload error:', error);
+		console.error('❌ Upload error:', error);
+		console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 
-		// Provide specific error message for HEIC/HEIF format issues
 		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-		const isHeicError = errorMessage.toLowerCase().includes('heif') ||
-		                    errorMessage.toLowerCase().includes('heic') ||
-		                    errorMessage.toLowerCase().includes('unsupported');
 
 		return json(
 			{
-				error: isHeicError
-					? 'Failed to process HEIC/HEIF image. This format may not be fully supported. Please try converting to JPG or PNG first.'
-					: 'Failed to process image',
-				details: errorMessage,
-				fileName: formData.get('file')?.name || 'unknown'
+				error: 'Failed to process image',
+				details: errorMessage
 			},
 			{ status: 500 }
 		);
