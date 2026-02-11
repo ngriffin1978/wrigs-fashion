@@ -1,0 +1,69 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - link "✨ Wrigs Fashion" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e6]: ✨
+      - generic [ref=e7]: Wrigs Fashion
+    - list [ref=e9]:
+      - listitem [ref=e10]:
+        - link "Upload" [ref=e11] [cursor=pointer]:
+          - /url: /upload
+      - listitem [ref=e12]:
+        - link "Catalogs" [ref=e13] [cursor=pointer]:
+          - /url: /catalogs
+    - generic [ref=e14]:
+      - link "Login 🔑" [ref=e15] [cursor=pointer]:
+        - /url: /auth/login
+      - link "Sign Up 🚀" [ref=e16] [cursor=pointer]:
+        - /url: /auth/register
+  - generic [ref=e20]:
+    - generic [ref=e21]:
+      - heading "✨ Join Wrigs Fashion! ✨" [level=1] [ref=e22]
+      - paragraph [ref=e23]: Create your account and start designing! 🎨
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e27]: 📧 Email
+        - textbox "📧 Email" [ref=e28]:
+          - /placeholder: you@example.com
+          - text: test-1770777660450@example.com
+      - generic [ref=e29]:
+        - generic [ref=e31]: 🔒 Password
+        - textbox "🔒 Password" [ref=e32]:
+          - /placeholder: At least 8 characters
+          - text: TestPassword123!
+        - paragraph [ref=e38]: Super secure! 🔒✨
+      - generic [ref=e39]:
+        - generic [ref=e41]: 🔄 Confirm Password
+        - textbox "🔄 Confirm Password" [ref=e42]:
+          - /placeholder: Type your password again
+        - generic [ref=e44]: Passwords don't match! Try again 🔄
+      - generic [ref=e45]:
+        - generic [ref=e47]: 🎨 Nickname
+        - textbox "🎨 Nickname" [ref=e48]:
+          - /placeholder: What should we call you?
+          - text: TestUser177077766045
+      - button "Create Account 🚀" [active] [ref=e49] [cursor=pointer]
+    - generic [ref=e50]: Already have an account?
+    - link "Login Instead 🔑" [ref=e51] [cursor=pointer]:
+      - /url: /auth/login
+    - generic [ref=e52]:
+      - paragraph [ref=e53]:
+        - text: By signing up, you agree to our
+        - link "Terms" [ref=e54] [cursor=pointer]:
+          - /url: /terms
+        - text: and
+        - link "Privacy Policy" [ref=e55] [cursor=pointer]:
+          - /url: /privacy
+        - text: .
+      - paragraph [ref=e56]: "👨‍👩‍👧 Parents: We take your child's safety seriously."
+  - contentinfo [ref=e57]:
+    - generic [ref=e58]:
+      - paragraph [ref=e59]: ✨ Wrigs Fashion
+      - paragraph [ref=e60]: Draw. Digitize. Play! 🎨
+      - paragraph [ref=e61]: Made with love for creative kids
+  - button "Open color customizer" [ref=e62] [cursor=pointer]:
+    - img [ref=e63]
+```

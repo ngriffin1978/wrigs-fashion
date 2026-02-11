@@ -1,0 +1,43 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - link "✨ Wrigs Fashion" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e6]: ✨
+      - generic [ref=e7]: Wrigs Fashion
+    - generic [ref=e8]:
+      - link "Login 🔑" [ref=e9] [cursor=pointer]:
+        - /url: /auth/login
+      - link "Sign Up 🚀" [ref=e10] [cursor=pointer]:
+        - /url: /auth/register
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - heading "✨ Welcome Back! ✨" [level=1] [ref=e16]
+      - paragraph [ref=e17]: Login to continue creating! 🎨
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e21]: 📧 Email
+        - textbox "📧 Email" [ref=e22]:
+          - /placeholder: you@example.com
+          - text: invalid@example.com
+      - generic [ref=e23]:
+        - generic [ref=e25]: 🔒 Password
+        - textbox "🔒 Password" [ref=e26]:
+          - /placeholder: Your password
+          - text: WrongPassword123!
+        - generic [ref=e28]: Forgot password? Contact support 💬
+      - generic [ref=e30]: Something went wrong! Please try again 😅
+      - button "Log In 🔑" [ref=e31] [cursor=pointer]
+    - generic [ref=e32]: Don't have an account?
+    - link "Create Account 🚀" [ref=e33] [cursor=pointer]:
+      - /url: /auth/register
+  - contentinfo [ref=e34]:
+    - generic [ref=e35]:
+      - paragraph [ref=e36]: ✨ Wrigs Fashion
+      - paragraph [ref=e37]: Draw. Digitize. Play! 🎨
+      - paragraph [ref=e38]: Made with love for creative kids
+  - button "Open color customizer" [ref=e39] [cursor=pointer]:
+    - img [ref=e40]
+```

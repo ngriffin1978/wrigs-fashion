@@ -14,6 +14,7 @@ test.describe('Authentication', () => {
 		// Fill registration form
 		await page.fill('input[name="email"], input[type="email"]', testUser.email);
 		await page.fill('input[name="password"], input[type="password"]', testUser.password);
+		await page.fill('input[name="confirmPassword"]', testUser.password);
 		await page.fill('input[name="nickname"], input[name="name"]', testUser.nickname);
 
 		// Submit form
@@ -83,6 +84,7 @@ test.describe('Authentication', () => {
 		await page.goto('/auth/register');
 		await page.fill('input[name="email"], input[type="email"]', testUser.email);
 		await page.fill('input[name="password"], input[type="password"]', testUser.password);
+		await page.fill('input[name="confirmPassword"]', testUser.password);
 		await page.fill('input[name="nickname"], input[name="name"]', testUser.nickname);
 
 		const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
@@ -144,6 +146,7 @@ test.describe('Authentication', () => {
 		await page.goto('/auth/register');
 		await page.fill('input[name="email"], input[type="email"]', testUser.email);
 		await page.fill('input[name="password"], input[type="password"]', testUser.password);
+		await page.fill('input[name="confirmPassword"]', testUser.password);
 		await page.fill('input[name="nickname"], input[name="name"]', testUser.nickname);
 
 		const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
@@ -173,6 +176,7 @@ test.describe('Authentication', () => {
 		await page.goto('/auth/register');
 		await page.fill('input[name="email"], input[type="email"]', testUser.email);
 		await page.fill('input[name="password"], input[type="password"]', testUser.password);
+		await page.fill('input[name="confirmPassword"]', testUser.password);
 		await page.fill('input[name="nickname"], input[name="name"]', testUser.nickname);
 
 		const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
@@ -230,6 +234,7 @@ test.describe('Authentication', () => {
 		await page.goto('/auth/register');
 		await page.fill('input[name="email"], input[type="email"]', testUser.email);
 		await page.fill('input[name="password"], input[type="password"]', testUser.password);
+		await page.fill('input[name="confirmPassword"]', testUser.password);
 		await page.fill('input[name="nickname"], input[name="name"]', testUser.nickname);
 
 		const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });

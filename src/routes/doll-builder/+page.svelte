@@ -77,7 +77,7 @@
 				<label class="label">
 					<span class="label-text font-bold text-lg">Choose a Pose:</span>
 				</label>
-				<div class="flex flex-col gap-2">
+				<div class="flex flex-col gap-2" role="radiogroup" aria-label="Pose filter">
 					<label class="flex items-center gap-3 cursor-pointer hover:bg-base-200 p-3 rounded-lg transition-colors">
 						<input
 							type="radio"
@@ -86,6 +86,7 @@
 							checked={filterPose === 'all'}
 							onchange={() => (filterPose = 'all')}
 							class="radio radio-primary"
+							aria-label="All Poses"
 						/>
 						<div>
 							<div class="font-semibold">All Poses</div>
@@ -100,9 +101,10 @@
 							checked={filterPose === 'pose-a'}
 							onchange={() => (filterPose = 'pose-a')}
 							class="radio radio-primary"
+							aria-label="Pose A - Classic Pose (Arms Out)"
 						/>
 						<div>
-							<div class="font-semibold">Classic Pose (Arms Out)</div>
+							<div class="font-semibold">Pose A - Classic (Arms Out)</div>
 							<div class="text-xs text-gray-500">{POSE_DESCRIPTIONS['pose-a']}</div>
 						</div>
 					</label>
@@ -114,9 +116,10 @@
 							checked={filterPose === 'pose-b'}
 							onchange={() => (filterPose = 'pose-b')}
 							class="radio radio-primary"
+							aria-label="Pose B - Standing Pose (Arms Down)"
 						/>
 						<div>
-							<div class="font-semibold">Standing Pose (Arms Down)</div>
+							<div class="font-semibold">Pose B - Standing (Arms Down)</div>
 							<div class="text-xs text-gray-500">{POSE_DESCRIPTIONS['pose-b']}</div>
 						</div>
 					</label>
@@ -128,7 +131,7 @@
 				<label class="label">
 					<span class="label-text font-bold text-lg">Choose a Body Type:</span>
 				</label>
-				<div class="flex flex-col gap-2">
+				<div class="flex flex-col gap-2" role="radiogroup" aria-label="Body type filter">
 					<label class="flex items-center gap-3 cursor-pointer hover:bg-base-200 p-3 rounded-lg transition-colors">
 						<input
 							type="radio"
@@ -137,6 +140,7 @@
 							checked={filterBodyType === 'all'}
 							onchange={() => (filterBodyType = 'all')}
 							class="radio radio-secondary"
+							aria-label="All Body Types"
 						/>
 						<div>
 							<div class="font-semibold">All Body Types</div>
@@ -151,6 +155,7 @@
 							checked={filterBodyType === 'average'}
 							onchange={() => (filterBodyType = 'average')}
 							class="radio radio-secondary"
+							aria-label="Classic Build"
 						/>
 						<div>
 							<div class="font-semibold">Classic Build</div>
@@ -165,6 +170,7 @@
 							checked={filterBodyType === 'curvy'}
 							onchange={() => (filterBodyType = 'curvy')}
 							class="radio radio-secondary"
+							aria-label="Curvy Build"
 						/>
 						<div>
 							<div class="font-semibold">Curvy Build</div>
@@ -179,6 +185,7 @@
 							checked={filterBodyType === 'petite'}
 							onchange={() => (filterBodyType = 'petite')}
 							class="radio radio-secondary"
+							aria-label="Petite Build"
 						/>
 						<div>
 							<div class="font-semibold">Petite Build</div>

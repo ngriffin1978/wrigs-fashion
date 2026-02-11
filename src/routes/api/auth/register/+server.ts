@@ -70,7 +70,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		const signInResponse = await auth.handler(signInRequest);
 		const signInData = await signInResponse.json();
 
-		if (!signInResponse.ok || !signInData.token) {
+		if (!signInResponse.ok || !signInData.user) {
 			console.error('Better Auth signin failed:', signInData);
 			throw error(500, 'Account created but login failed. Please try logging in! 🔑');
 		}
@@ -85,7 +85,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 					path: '/',
 					httpOnly: true,
 					sameSite: 'lax',
-					secure: false, // Set to true in production
+					secure: process.env.NODE_ENV === 'production',
 					maxAge: 60 * 60 * 24 * 30 // 30 days
 				});
 			}

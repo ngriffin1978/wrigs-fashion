@@ -17,6 +17,7 @@ test.describe('Circles (Invite-Only Groups)', () => {
 		await page.goto('/auth/register');
 		await page.fill('input[name="email"], input[type="email"]', user.email);
 		await page.fill('input[name="password"], input[type="password"]', user.password);
+		await page.fill('input[name="confirmPassword"]', user.password);
 		await page.fill('input[name="nickname"], input[name="name"]', user.nickname);
 
 		const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });

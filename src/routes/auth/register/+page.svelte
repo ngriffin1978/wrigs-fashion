@@ -106,6 +106,7 @@
 					<input
 						type="email"
 						id="email"
+						name="email"
 						bind:value={email}
 						class="input input-bordered w-full"
 						class:input-error={errors.email}
@@ -127,6 +128,7 @@
 					<input
 						type="password"
 						id="password"
+						name="password"
 						bind:value={password}
 						class="input input-bordered w-full"
 						class:input-error={errors.password}
@@ -160,6 +162,7 @@
 					<input
 						type="password"
 						id="confirmPassword"
+						name="confirmPassword"
 						bind:value={confirmPassword}
 						class="input input-bordered w-full"
 						class:input-error={errors.confirmPassword}
@@ -181,6 +184,7 @@
 					<input
 						type="text"
 						id="nickname"
+						name="nickname"
 						bind:value={nickname}
 						class="input input-bordered w-full"
 						class:input-error={errors.nickname}

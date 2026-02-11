@@ -21,7 +21,7 @@
 				<p class="text-xl mb-6 text-gray-600">
 					Turn your fashion drawings into amazing paper dolls ✨
 				</p>
-				<a href="/upload" class="btn btn-primary btn-lg sparkle shadow-lg">
+				<a href="/upload" class="btn btn-primary btn-lg sparkle shadow-lg" data-testid="hero-cta">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-6 w-6 mr-2"

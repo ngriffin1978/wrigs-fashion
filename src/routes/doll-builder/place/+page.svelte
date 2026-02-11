@@ -9,6 +9,7 @@
 	let designId = $state<string | null>(null);
 	let template = $state<DollTemplate | null>(null);
 	let outfitCategory = $state<'top' | 'bottom' | 'dress' | 'shoes'>('top');
+	let paperSize = $state<'letter' | 'a4'>('letter');
 
 	// Design positioning
 	let designX = $state(0);
@@ -170,6 +171,7 @@
 					templateId: template.id,
 					designImageUrl,
 					designId: designId,
+					paperSize: paperSize,
 					placement: {
 						category: outfitCategory,
 						x: designX,
@@ -353,6 +355,35 @@
 							bind:value={designRotation}
 							class="range range-accent range-sm"
 						/>
+					</div>
+
+					<!-- Paper Size Selector -->
+					<div class="mb-6">
+						<label class="label">
+							<span class="label-text font-bold">Paper Size:</span>
+						</label>
+						<div class="flex gap-2">
+							<label class="btn btn-outline flex-1" class:btn-primary={paperSize === 'letter'}>
+								<input
+									type="radio"
+									name="paperSize"
+									value="letter"
+									bind:group={paperSize}
+									class="hidden"
+								/>
+								📄 Letter (8.5×11")
+							</label>
+							<label class="btn btn-outline flex-1" class:btn-primary={paperSize === 'a4'}>
+								<input
+									type="radio"
+									name="paperSize"
+									value="a4"
+									bind:group={paperSize}
+									class="hidden"
+								/>
+								📄 A4 (210×297mm)
+							</label>
+						</div>
 					</div>
 
 					<!-- Generate Button -->

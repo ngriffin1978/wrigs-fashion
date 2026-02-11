@@ -77,6 +77,7 @@
 					<input
 						type="email"
 						id="email"
+						name="email"
 						bind:value={email}
 						class="input input-bordered w-full"
 						placeholder="you@example.com"
@@ -93,6 +94,7 @@
 					<input
 						type="password"
 						id="password"
+						name="password"
 						bind:value={password}
 						class="input input-bordered w-full"
 						placeholder="Your password"
@@ -122,7 +124,7 @@
 						<span class="loading loading-spinner"></span>
 						Logging in...
 					{:else}
-						Login 🔑
+						Log In 🔑
 					{/if}
 				</button>
 			</form>

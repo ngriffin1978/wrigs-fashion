@@ -1,0 +1,49 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - link "✨ Wrigs Fashion" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e6]: ✨
+      - generic [ref=e7]: Wrigs Fashion
+    - list [ref=e9]:
+      - listitem [ref=e10]:
+        - link "Upload" [ref=e11] [cursor=pointer]:
+          - /url: /upload
+      - listitem [ref=e12]:
+        - link "Catalogs" [ref=e13] [cursor=pointer]:
+          - /url: /catalogs
+    - generic [ref=e14]:
+      - link "Login 🔑" [ref=e15] [cursor=pointer]:
+        - /url: /auth/login
+      - link "Sign Up 🚀" [ref=e16] [cursor=pointer]:
+        - /url: /auth/register
+  - generic [ref=e21]:
+    - heading "Upload Your Drawing 📸" [level=2] [ref=e22]
+    - generic [ref=e23] [cursor=pointer]:
+      - img [ref=e25]
+      - heading "Drop your drawing here!" [level=3] [ref=e27]
+      - paragraph [ref=e28]: or click to browse
+      - generic [ref=e29]: Choose File
+      - paragraph [ref=e30]: JPG, PNG or HEIC • Max 10MB
+    - generic [ref=e33]:
+      - heading "✂️ Circle Your Drawing" [level=3] [ref=e34]
+      - paragraph [ref=e35]:
+        - strong [ref=e36]: Click and drag
+        - text: to draw a circle around the part you want to keep
+      - generic [ref=e39]:
+        - button "🔄 Clear Selection" [ref=e40] [cursor=pointer]
+        - button "Skip" [ref=e41] [cursor=pointer]
+        - button "✂️ Crop & Continue" [active] [ref=e42] [cursor=pointer]
+    - generic [ref=e44]:
+      - img [ref=e45]
+      - generic [ref=e47]: Take a clear photo with good lighting for best results!
+  - contentinfo [ref=e48]:
+    - generic [ref=e49]:
+      - paragraph [ref=e50]: ✨ Wrigs Fashion
+      - paragraph [ref=e51]: Draw. Digitize. Play! 🎨
+      - paragraph [ref=e52]: Made with love for creative kids
+  - button "Open color customizer" [ref=e53] [cursor=pointer]:
+    - img [ref=e54]
+```

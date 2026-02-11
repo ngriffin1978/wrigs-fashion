@@ -53,6 +53,16 @@
 			</span>
 		</a>
 	</div>
+	<div class="navbar-center hidden lg:flex">
+		<ul class="menu menu-horizontal px-1">
+			<li><a href="/upload">Upload</a></li>
+			<li><a href="/catalogs">Catalogs</a></li>
+			{#if data.user}
+				<li><a href="/portfolio">Portfolio</a></li>
+				<li><a href="/circles">Circles</a></li>
+			{/if}
+		</ul>
+	</div>
 	<div class="navbar-end gap-2">
 		{#if data.user}
 			<!-- Authenticated User -->
@@ -80,7 +90,7 @@
 					<li><a href="/catalogs">My Catalogs</a></li>
 					<li><a href="/circles">My Circles</a></li>
 					<li><a href="/settings">Settings</a></li>
-					<li><button onclick={handleLogout}>Logout 👋</button></li>
+					<li><button onclick={handleLogout} data-testid="logout-button">Log Out 👋</button></li>
 				</ul>
 			</div>
 		{:else}
