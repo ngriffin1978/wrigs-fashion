@@ -12,6 +12,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Current Status:** Phase 5 Complete (Circles + Sharing System)
 **Next Phase:** Polish & Deploy (Phase 6)
 
+**Recent Fix (2026-02-11):** Resolved critical database compatibility issue
+- Fixed LATERAL join errors in catalog API endpoints
+- Updated Docker configuration to use external MySQL 8.0 database
+- Application now fully operational with all features working
+
 ---
 
 ## 1) Product Summary
@@ -68,12 +73,12 @@ Wrigs Fashion is a web app where kids can:
 **Web stack:**
 - SvelteKit (with Svelte 5 runes) + TypeScript
 - TailwindCSS + DaisyUI (Lemon Meringue theme)
-- Drizzle ORM + MySQL (✅ connected and operational)
+- Drizzle ORM + **MySQL 8.0+** (✅ connected and operational - REQUIRES MySQL 8.0+ or MariaDB 10.6.1+)
 - Auth: Better Auth (✅ implemented with email/password)
 - Object storage: Local static files (production TBD: Cloudflare R2)
 - Image processing: Sharp.js (server-side)
 - PDF generation: PDFKit (✅ implemented)
-- Deployment: adapter-node (Node.js server)
+- Deployment: adapter-node (Node.js server) with Docker
 
 **Key Architecture Decisions:**
 - Better Auth with email/password authentication (cookie-based sessions)

@@ -1,593 +1,882 @@
-# Session Handoff Document
-
-**Date:** 2026-02-03 (Evening Session)
-**Session Duration:** Brief administrative session (~15 minutes)
-**Project:** Wrigs Fashion V1 - Kid-friendly fashion design web app
-**Status:** Phase 2 Complete, Documentation Synchronized
+# Project Handoff Document - Wrigs Fashion
+**Last Updated:** 2026-02-11
+**Status:** Phase 5 Complete + Critical Database Fix
+**Next Phase:** Phase 6 - Polish & Deploy to Production
 
 ---
 
-## What Was Accomplished This Session
+## 🎯 Current Status
 
-### 1. Project Scope Update
-- **GitHub MCP plugin removed** from project scope
-- Verified `.claude/settings.json` configuration (enabledPlugins is empty)
-- Confirmed project is not a git repository (no version control)
-- No GitHub integration will be used for this project
+### Project Phase: Phase 5 Complete ✅
+**All core V1 features implemented:**
+- ✅ Authentication (Better Auth with email/password)
+- ✅ Image upload with HEIC/HEIF support
+- ✅ Crop/rotate + cleanup pipeline
+- ✅ Canvas editor (6 tools: brush, spray paint, glitter, stamp, magic wand, eraser)
+- ✅ Paper doll templates (6 templates: 2 poses × 3 body types)
+- ✅ PDF export (Letter + A4 formats)
+- ✅ Portfolio CRUD (create/list/view/delete)
+- ✅ Achievement badges and stats
+- ✅ Circles (invite-only groups)
+- ✅ Sharing system with reactions + preset compliments
+- ✅ Docker deployment setup
+- ✅ Catalog system (fashion collections on canvas)
 
-### 2. Documentation Synchronization
-- Reviewed all existing project documentation
-- Verified consistency across README, HANDOFF, SESSION-SUMMARY, CLAUDE.md
-- Prepared comprehensive session closure materials
-- Updated HANDOFF.md with current project state
+### Recently Completed (2026-02-11) - CRITICAL FIX
+🔧 **Fixed database compatibility issue that was preventing catalog API from working**
 
-### 3. Previous Session Summary (For Context)
-**Earlier today (Feb 3, morning):** Paper Doll Template System (Complete)
-Created comprehensive template system with **6 inclusive doll templates**:
-- **2 poses:**
-  - Pose A: Classic paper doll pose with arms out (great for jackets/accessories)
-  - Pose B: Standing pose with arms down (great for dresses/flowing designs)
-- **3 body types (inclusive, no body shaming):**
-  - Classic Build
-  - Curvy Build
-  - Petite Build
+**Problem:** Application was experiencing "Failed query" errors on `/api/catalogs` endpoints
 
-**Files Created:**
-- `/home/grifin/projects/wrigs-fashion/static/templates/dolls/` - 6 SVG template files
-  - `pose-a-average.svg`, `pose-a-curvy.svg`, `pose-a-petite.svg`
-  - `pose-b-average.svg`, `pose-b-curvy.svg`, `pose-b-petite.svg`
-- `/home/grifin/projects/wrigs-fashion/src/lib/data/doll-templates.ts` (184 lines) - Template metadata with outfit regions
+**Root Causes:**
+1. **LATERAL Join Incompatibility:** Drizzle ORM was generating MySQL-style LATERAL joins, but the Docker container had MariaDB 10.5 which doesn't support this feature (added in MariaDB 10.6.1)
+2. **Hardcoded Database URL:** The supervisord configuration was hardcoding `DATABASE_URL=localhost:3306` (internal MariaDB), overriding the docker-compose environment variable that pointed to the external MySQL 8.0 database
 
-**Template Features:**
-- Each template has defined regions: `topRegion`, `bottomRegion`, `dressRegion`, `shoesRegion`
-- Regions stored as coordinates (x, y, width, height) for design placement
-- Positive, inclusive labels: "Classic Build", "Curvy Build", "Petite Build"
-- SVG format (scalable, high-quality)
+**Solutions Implemented:**
+1. Rewrote catalog API queries to avoid LATERAL joins by fetching items separately using `inArray()`
+2. Updated `docker/supervisord.conf` to use environment variables: `DATABASE_URL="%(ENV_DATABASE_URL)s"`
+3. Configured `docker-compose.yml` to connect to external MySQL 8.0 database
+4. Removed internal MariaDB volume from docker-compose (now uses external database)
 
-### 2. Template Selection UI (Complete)
-Built intuitive template browser with filtering:
-- Grid layout showing all 6 templates
-- Filter by **pose** (Pose A / Pose B / All)
-- Filter by **body type** (Classic / Curvy / Petite / All)
-- Responsive design with hover effects
-- Visual preview of each template
-- "Choose This Doll" button for selection
+**Commit:** `9c36b12` - "fix: MySQL 8.0 compatibility and Docker database configuration"
 
-**Files:**
-- `/home/grifin/projects/wrigs-fashion/src/routes/doll-builder/+page.svelte` (262 lines)
-
-**User Flow:**
-1. User navigates to `/doll-builder` from editor
-2. Filters templates by pose/body type
-3. Clicks "Choose This Doll"
-4. Redirects to placement UI with selected template
-
-### 3. Interactive Design Placement UI (Complete)
-Built canvas-based placement interface with **live preview**:
-- **Canvas controls:**
-  - Drag to reposition design
-  - Pinch/zoom to scale (or slider for desktop)
-  - Preview updates in real-time
-- **Category selection:** Top, Bottom, Dress, Shoes
-- **Visual feedback:**
-  - Doll template shown with outfit region highlighted
-  - User's design rendered on canvas with transparency
-  - Region boundaries visible (dotted outline)
-- **Paper size selection:** Letter (8.5x11) or A4 (210x297mm)
-
-**Files:**
-- `/home/grifin/projects/wrigs-fashion/src/routes/doll-builder/place/+page.svelte` (384 lines)
-
-**Features:**
-- Canvas-based rendering (HTML5 Canvas API)
-- Real-time position/scale updates
-- Touch-friendly controls (mobile/tablet)
-- Preview before PDF generation
-- "Generate PDF" button triggers API call
-
-### 4. PDF Generation Service (Complete)
-Implemented server-side PDF generation with **PDFKit**:
-- **2-page PDF output:**
-  - **Page 1:** Paper doll base with cut lines and fold tab
-  - **Page 2:** Outfit piece with user's design, tabs, and cut lines
-- **Supported paper sizes:** US Letter and A4
-- **Professional layout:**
-  - Safe print margins (0.5 inch / 12.7mm)
-  - Dashed cut lines (#999 gray)
-  - Fold tabs with labels ("fold")
-  - Title and instructions on each page
-  - Cute footer: "✨ Made with Wrigs Fashion ✨"
-
-**Files:**
-- `/home/grifin/projects/wrigs-fashion/src/lib/services/pdf-generator.ts` (333 lines) - PDFKit service
-- `/home/grifin/projects/wrigs-fashion/src/routes/api/generate-pdf/+server.ts` (65 lines) - API endpoint
-
-**Technical Details:**
-- Server-side generation (Node.js)
-- Stores PDFs in `/static/pdfs/`
-- Filename format: `paper-doll-{templateId}-{timestamp}.pdf`
-- Returns PDF URL for download
-- Handles both Letter and A4 paper sizes
-
-### 5. End-to-End Testing (Complete)
-Successfully tested complete flow:
-1. Upload sketch photo
-2. Freeform crop
-3. Process image (background removal, color normalization)
-4. Color with editor tools
-5. **Click "Create Paper Doll"**
-6. **Select template (tested multiple templates)**
-7. **Place design on canvas**
-8. **Adjust position and scale**
-9. **Generate PDF**
-10. **Download and verify printability**
-
-**Test Results:**
-- ✅ All 6 templates work correctly
-- ✅ PDF generation succeeds for both Letter and A4
-- ✅ PDFs print correctly with visible cut lines
-- ✅ Design placement accurate
-- ✅ Canvas controls responsive
-
-**Generated PDFs (in static/pdfs/):**
-- `paper-doll-pose-a-curvy-1770147053232.pdf` (68.6 KB)
-- `paper-doll-pose-b-petite-1770146646916.pdf` (80.6 KB)
+**Verification:**
+- ✅ Catalog API endpoints now return correct responses
+- ✅ Data is being written to external MySQL 8.0 database
+- ✅ No more "Failed query" or LATERAL join errors
+- ✅ Application logs are accessible and properly formatted
 
 ---
 
-## Current State
+## 🏗️ Architecture Overview
 
-### Running Services
-- **Dev Server:** http://localhost:3001 (Vite + SvelteKit)
-- **Node Version:** v18.20.8 (via nvm)
-- **Background Processes:** Multiple Vite dev instances running on port 3001
+### Tech Stack
+- **Frontend:** SvelteKit (Svelte 5 with runes) + TypeScript
+- **Styling:** TailwindCSS + DaisyUI (Lemon Meringue theme)
+- **Database:** MySQL 8.0 (Drizzle ORM) **← CRITICAL: Must be MySQL 8.0+ or MariaDB 10.6.1+**
+- **Auth:** Better Auth v1.4.18 (email/password, cookie-based sessions, 30-day expiry)
+- **Image Processing:** Sharp.js (server-side, supports HEIC/HEIF from iOS)
+- **PDF Generation:** PDFKit (2-page layout with cut lines and fold tabs)
+- **Deployment:** Docker (adapter-node, Node.js server with nginx + supervisord)
 
-### Database Status
-- Schema defined with Drizzle ORM (MySQL)
-- Tables: User, Design, DollTemplate, DollProject, Circle, CircleMember, SharedItem, Reaction, Compliment
-- **NOT YET CONNECTED** - No migrations run, no data persistence yet
+### Database Configuration ⚠️ CRITICAL
+**The application requires MySQL 8.0+ or MariaDB 10.6.1+ for full compatibility.**
 
-### File System
-- **Processed images:** `/home/grifin/projects/wrigs-fashion/static/uploads/`
-  - Format: `{fileId}-original.png` and `{fileId}-cleaned.png`
-- **Generated PDFs:** `/home/grifin/projects/wrigs-fashion/static/pdfs/`
-  - Format: `paper-doll-{templateId}-{timestamp}.pdf`
-- **Doll templates:** `/home/grifin/projects/wrigs-fashion/static/templates/dolls/`
-  - 6 SVG files (2 poses × 3 body types)
+**Why:** Drizzle ORM generates optimized queries for modern MySQL. Using older versions (especially MariaDB 10.5) will cause "Failed query" errors due to missing SQL features.
 
----
-
----
-
-## Current State Summary
-
-### Project Phase Status
-- ✅ **Phase 1 Complete** (Feb 1-2): Image Upload + Processing + Canvas Editor
-- ✅ **Phase 2 Complete** (Feb 3 morning): Paper Doll Templates + PDF Generation
-- 📋 **Phase 3 Planned**: Authentication + Database Integration
-- 📋 **Phase 4 Future**: Portfolio CRUD + User Management
-- 📋 **Phase 5 Future**: Sharing + Circles
-
-### Key Decisions This Session
-1. **No GitHub integration** - Project not using version control currently
-2. **No MCP plugins enabled** - Confirmed in settings
-3. **Focus on local development** - All work remains local
-
-### Working Features (Verified)
-- Complete upload → crop → process → edit flow
-- 6 creative editor tools with patterns
-- 6 inclusive paper doll templates
-- Template selection with filters
-- Interactive placement with live preview
-- PDF generation (Letter + A4)
-- All tested end-to-end earlier today
+**Current Setup:**
+- **External MySQL 8.0 container:** `wrigs-fashion-db-dev`
+- **Connection string:** `mysql://wrigs_user:password@wrigs-fashion-db-dev:3306/wrigs_fashion`
+- **Configured in:**
+  - `docker-compose.yml` (environment variable)
+  - `docker/supervisord.conf` (uses environment variable interpolation)
 
 ---
 
-## Immediate Next Steps (Prioritized)
+## 🚀 Getting Started
 
-### 1. Consider Version Control (RECOMMENDED - 15 minutes)
-**Why:** Before starting Phase 3, establish version control to track changes safely.
-
-**Tasks:**
+### Start the Application
 ```bash
-cd /home/grifin/projects/wrigs-fashion
-git init
-# Create .gitignore (see previous recommendations in this document)
-git add .
-git commit -m "Initial commit: Phases 1 & 2 complete"
+cd /root/projects/wrigs-fashion
+
+# Start all services (both app and database containers)
+docker compose up -d
+
+# Check container status
+docker ps
+
+# View real-time logs
+docker logs wrigs-fashion --follow
 ```
 
-**Benefits:**
-- Track changes during Phase 3 development
-- Easy rollback if needed
-- Foundation for GitHub if desired later (currently not planned)
+### Access Points
+- **HTTPS:** https://localhost:443 (self-signed certificate - browser will warn)
+- **HTTP:** http://localhost:80 (redirects to HTTPS)
+- **External MySQL:** localhost:3306 (wrigs-fashion-db-dev container)
 
-**Decision needed:** Initialize git or continue without version control?
-
-### 2. Authentication System (HIGH PRIORITY - Phase 3)
-**Why:** Required for portfolio, sharing, and user data persistence.
-
-**Recommended approach: Lucia Auth**
-- Already in package.json
-- Lightweight, TypeScript-first
-- Works well with SvelteKit
-- Flexible session management
-
-**Tasks:**
-1. Set up Lucia Auth with session management
-2. Create user registration flow (email + password)
-3. Create login flow
-4. Add protected routes (portfolio, settings)
-5. Store user sessions in database
-6. Add logout functionality
-
-**Acceptance criteria:**
-- Users can register with email + password (or username + password)
-- Users can log in and stay logged in across sessions
-- Protected routes redirect to login if not authenticated
-- Sessions persist in database
-
-**Files to create:**
-- `/src/lib/server/auth.ts` - Lucia Auth setup
-- `/src/routes/login/+page.svelte` - Login page
-- `/src/routes/register/+page.svelte` - Registration page
-- `/src/routes/api/auth/login/+server.ts` - Login endpoint
-- `/src/routes/api/auth/register/+server.ts` - Registration endpoint
-- `/src/routes/api/auth/logout/+server.ts` - Logout endpoint
-
-### 2. Database Integration (HIGH PRIORITY - Phase 3)
-**Why:** Enable saving designs, portfolios, and paper doll projects.
-
-**Tasks:**
-1. Connect to MySQL database (local or hosted)
-2. Run Drizzle migrations to create tables
-3. Update upload API to save Design records
-4. Update PDF generation to save DollProject records
-5. Link designs to authenticated users
-
-**Acceptance criteria:**
-- Database tables created and accessible
-- Designs saved with userId, originalImageUrl, cleanedImageUrl
-- DollProjects saved with designId, templateId, placement data
-- Foreign key relationships working
-
-**Commands:**
+### Viewing Application Logs
 ```bash
-# Generate migrations from schema
-npm run db:generate
+# Application error logs (API errors, exceptions)
+docker exec wrigs-fashion tail -f /var/log/supervisor/sveltekit_error.log
 
-# Apply migrations to database
+# Application stdout logs (console.log statements)
+docker exec wrigs-fashion tail -f /var/log/supervisor/sveltekit.log
+
+# Filter for specific API endpoint
+docker exec wrigs-fashion tail -f /var/log/supervisor/sveltekit_error.log | grep --line-buffered "/api/catalogs"
+
+# All services combined (nginx, mysql, sveltekit)
+docker logs wrigs-fashion --follow
+
+# Specific service logs
+docker exec wrigs-fashion tail -f /var/log/supervisor/nginx_error.log
+docker exec wrigs-fashion tail -f /var/log/supervisor/mysql.log
+```
+
+### Database Access
+```bash
+# Connect to external MySQL database
+docker exec wrigs-fashion-db-dev mysql -uwrigs_user -ppassword wrigs_fashion
+
+# View all tables
+docker exec wrigs-fashion-db-dev mysql -uwrigs_user -ppassword wrigs_fashion -e "SHOW TABLES;"
+
+# Check catalog data
+docker exec wrigs-fashion-db-dev mysql -uwrigs_user -ppassword wrigs_fashion -e "SELECT * FROM catalogs LIMIT 5;"
+
+# Run migrations (if needed)
+docker exec wrigs-fashion /usr/local/bin/run-migrations.sh
+```
+
+---
+
+## 📋 Feature Completion Status
+
+### ✅ Phase 1: Upload & Image Processing (Complete)
+- Image upload with drag-and-drop
+- HEIC/HEIF format support (iOS photos)
+- Freeform crop tool
+- Background removal and enhancement
+- Sharp.js processing pipeline (posterize to 32 colors for Magic Wand)
+- Max 10MB upload size
+
+### ✅ Phase 2: Canvas Editor (Complete)
+- 6 creative tools:
+  1. Brush (variable size)
+  2. Spray Paint (particle effect)
+  3. Glitter (sparkle overlay)
+  4. Stamp (repeating patterns)
+  5. Magic Wand (flood fill - works well with 32-color posterization)
+  6. Eraser
+- Pattern overlays: dots, stripes, stars, hearts, sparkles
+- Color picker
+- Undo/redo functionality
+
+### ✅ Phase 3: Paper Doll System (Complete)
+- 6 inclusive templates (2 poses × 3 body types)
+  - Pose A: Arms out (great for jackets/accessories)
+  - Pose B: Arms down (great for dresses/flowing designs)
+  - Body types: Classic Build, Curvy Build, Petite Build
+- Template selection with filters (pose + body type)
+- Interactive placement canvas (drag, scale, rotate)
+- PDF generation with PDFKit:
+  - 2-page layout (doll base + outfit piece)
+  - Cut lines (dashed #999 gray)
+  - Fold tabs with labels
+  - Letter (8.5×11) and A4 (210×297mm) support
+  - Safe print margins (0.5 inch / 12.7mm)
+
+### ✅ Phase 4: Authentication & Portfolio (Complete)
+- Better Auth integration (email/password)
+- User registration and login
+- Cookie-based sessions (30-day expiry)
+- Protected routes (portfolio, circles)
+- Dual-mode system:
+  - Anonymous users: sessionId cookie
+  - Authenticated users: userId from session
+  - Automatic catalog migration on signup
+- Portfolio CRUD:
+  - View all saved designs
+  - Delete designs with confirmation
+  - Achievement badges (First Upload, Colorful Creator, etc.)
+  - Stats tracking (designs created, dolls made, items shared)
+
+### ✅ Phase 5: Circles & Sharing (Complete)
+- Invite-only groups (8-character uppercase alphanumeric codes)
+- Circle creation with collision prevention
+- Circle membership (Owner role cannot leave, must delete circle)
+- Share designs/dolls to multiple circles
+- Batch sharing API
+- Feed with hydrated data (design/doll details)
+- Reactions: 6 emoji types (❤️ 😍 👏 ✨ 🔥 😊)
+- Compliments: 5 preset phrases (toggle behavior)
+- Safety features:
+  - No public discovery
+  - Owner controls (remove members/items)
+  - No free-text comments (presets only)
+
+### ✅ Phase 5.5: Catalog System (Complete)
+- Fashion collections on canvas
+- Drag images from portfolio
+- Position, scale, and rotate items
+- Background color customization
+- Background pattern overlays
+- Save/load catalog state
+- Share catalogs via unique slug
+- Public/private toggle
+- **Recently Fixed:** MySQL 8.0 compatibility (removed LATERAL joins)
+
+---
+
+## 📋 Phase 6: Polish & Deploy (Next Steps)
+
+### High Priority
+- [ ] **Deploy to production** with managed infrastructure
+  - [ ] Migrate to managed MySQL (PlanetScale, Railway, AWS RDS, or similar)
+  - [ ] Set up object storage (Cloudflare R2 or AWS S3) for images/PDFs
+  - [ ] Configure production domain with HTTPS
+  - [ ] Set up proper AUTH_SECRET (32-character random string)
+  - [ ] Enable `useSecureCookies: true` in auth config
+  - [ ] Update PUBLIC_APP_URL to production domain
+
+- [ ] **Production polish**
+  - [ ] Comprehensive error handling with user-friendly messages
+  - [ ] Loading states for all async operations
+  - [ ] Empty states for portfolio, circles, catalogs
+  - [ ] Form validation with helpful error messages
+  - [ ] Toast notifications for success/error feedback
+  - [ ] Skeleton loaders for data fetching
+
+- [ ] **Performance optimization**
+  - [ ] Image optimization (lazy loading, responsive images)
+  - [ ] Code splitting
+  - [ ] Bundle size analysis
+  - [ ] Lighthouse audit and fixes
+
+### Medium Priority
+- [ ] Email verification system (currently disabled for V1)
+- [ ] Error tracking (Sentry or similar)
+- [ ] Rate limiting on auth endpoints
+- [ ] Analytics (privacy-friendly, COPPA-compliant)
+- [ ] Remove ColorCustomizer from `+layout.svelte` (design tool, not user feature)
+
+### Low Priority / Future (V2)
+- [ ] Age gating / COPPA compliance
+- [ ] Parent dashboard
+- [ ] Advanced background removal (AI-powered)
+- [ ] Real-time collaboration
+- [ ] Mobile app (React Native or Flutter)
+- [ ] OAuth providers (Google, Apple)
+
+---
+
+## 🔧 Technical Details
+
+### Critical Implementation Notes
+
+#### 1. Catalog API - MySQL 8.0 Compatibility Fix
+**Files Modified:**
+- `/src/routes/api/catalogs/+server.ts`
+- `/src/routes/api/catalogs/[id]/+server.ts`
+
+**Problem:** Drizzle ORM's `with: { items: true }` generated LATERAL joins (not supported in MariaDB 10.5)
+
+**Solution:** Fetch catalog items separately using `inArray()`:
+```typescript
+// Fetch catalogs without LATERAL joins
+const catalogList = await db
+  .select()
+  .from(catalogs)
+  .where(whereClause)
+  .orderBy(desc(catalogs.updatedAt));
+
+// Fetch all items in a single query
+const catalogIds = catalogList.map((c) => c.id);
+const allItems = catalogIds.length > 0
+  ? await db.select().from(catalogItems).where(inArray(catalogItems.catalogId, catalogIds))
+  : [];
+
+// Group items by catalog ID
+const itemsByCatalogId = allItems.reduce((acc, item) => {
+  if (!acc[item.catalogId]) acc[item.catalogId] = [];
+  acc[item.catalogId].push(item);
+  return acc;
+}, {} as Record<string, typeof allItems>);
+
+// Combine catalogs with their items
+const results = catalogList.map((catalog) => ({
+  ...catalog,
+  items: itemsByCatalogId[catalog.id] || []
+}));
+```
+
+#### 2. Docker Configuration - Environment Variables
+**File Modified:** `/docker/supervisord.conf`
+
+**Problem:** Hardcoded `DATABASE_URL` was overriding docker-compose environment variables
+
+**Solution:** Use supervisord's environment variable interpolation:
+```ini
+[program:sveltekit]
+command=node build
+directory=/app
+environment=NODE_ENV="production",DATABASE_URL="%(ENV_DATABASE_URL)s",AUTH_SECRET="%(ENV_AUTH_SECRET)s",PUBLIC_APP_URL="%(ENV_PUBLIC_APP_URL)s",PORT="3000",BODY_SIZE_LIMIT="15728640"
+```
+
+**File Modified:** `/docker-compose.yml`
+```yaml
+services:
+  wrigs-fashion:
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mysql://wrigs_user:password@wrigs-fashion-db-dev:3306/wrigs_fashion
+      - PUBLIC_APP_URL=https://localhost
+      - AUTH_SECRET=${AUTH_SECRET:-}
+    networks:
+      - default
+      - wrigs-network  # Connect to external database network
+
+networks:
+  wrigs-network:
+    external: true
+    name: wrigs-fashion_wrigs-network
+```
+
+#### 3. Authentication System (Better Auth)
+**Location:** `/src/lib/server/auth/config.ts`
+
+**Features:**
+- Email/password authentication
+- Cookie-based sessions (30-day expiry)
+- Server-side session validation via `hooks.server.ts`
+- Dual-mode support (anonymous + authenticated users)
+
+**Protected Routes:**
+- `/portfolio` - Requires authentication
+- `/circles` - Requires authentication
+- `/onboarding` - Requires authentication
+
+**Dual-Mode Architecture:**
+- Anonymous users use `sessionId` cookie for catalog access
+- Authenticated users use `userId` from Better Auth session
+- On signup: automatic migration of sessionId catalogs to userId
+
+**Migration Service:** `/src/lib/server/services/catalog-migration.ts`
+
+#### 4. Image Processing Pipeline
+**Location:** `/src/routes/api/upload/+server.ts`
+
+Multi-step Sharp.js pipeline:
+1. Resize to max 2000px (maintain aspect ratio)
+2. Brightness boost (1.4x)
+3. Saturation boost (1.5x)
+4. Normalize (push background toward white)
+5. Posterize to 32 colors (helps Magic Wand tool)
+6. Sharpen edges
+7. Add neutral gray padding (#f8f8f8)
+
+**Max upload size:** 10MB
+**Supported formats:** JPG, PNG, HEIC/HEIF (iOS photos)
+**Processing timeout:** 30 seconds
+**Max dimension:** 2000px
+
+**Why posterize to 32 colors?** Makes the Magic Wand flood fill tool effective by consolidating similar colors into distinct regions.
+
+#### 5. PDF Generation Service
+**Location:** `/src/lib/services/pdf-generator.ts` (378 lines)
+
+PDFKit-based service generates 2-page PDFs:
+- **Page 1:** Paper doll base with cut lines and fold tab
+- **Page 2:** Outfit piece with user's design, tabs, and cut lines
+
+**Technical specs:**
+- Safe print margins: 0.5 inch / 12.7mm
+- Dashed cut lines: `dash(5, 3)` with `#999` color
+- Tab labels: Small "fold" text (8pt font)
+- Footer: "✨ Made with Wrigs Fashion ✨"
+- Supports Letter (8.5×11 inch) and A4 (210×297mm)
+- Max file size: 5MB per PDF
+
+#### 6. Paper Doll Template System
+**Location:** `/src/lib/data/doll-templates.ts` (184 lines)
+
+6 templates hardcoded in TypeScript (not in database):
+- 2 poses (A: arms out, B: arms down)
+- 3 body types (Classic, Curvy, Petite)
+- Each has defined regions: top, bottom, dress, shoes
+- Regions use coordinate system: `{x, y, width, height}`
+
+**Why hardcoded?** Simplifies V1 architecture. Can migrate to database in future versions if templates become dynamic.
+
+#### 7. Circle & Sharing System
+**Key Files:**
+- `/src/lib/utils/invite-codes.ts` - Code generation
+- `/src/lib/utils/circle-permissions.ts` - Permission checks
+- `/src/routes/circles/+page.svelte` - Circles listing
+- `/src/routes/circles/[id]/+page.svelte` - Circle detail with feed
+
+**Invite Code Architecture:**
+- 8-character uppercase alphanumeric (e.g., "ABCD1234")
+- Collision prevention with retry logic (up to 5 attempts)
+- Case-insensitive matching (normalized to uppercase)
+- Uniqueness validated before insertion
+
+**Membership Roles:**
+- **Owner:** Cannot leave circle (must delete entire circle)
+- **Member:** Can leave at any time
+
+**Sharing Flow:**
+1. User creates/joins circles
+2. From portfolio: "Share to Circle" → multi-select modal
+3. Batch API: `/api/share` (share to multiple circles at once)
+4. Shared items stored with `itemType` (design/doll) and `itemId`
+5. Feed loads with **hydrated data** (includes full design/doll details)
+
+**Reactions & Compliments:**
+- **6 emoji reactions:** ❤️ 😍 👏 ✨ 🔥 😊
+- **5 preset compliments:** "So creative!", "Love it!", "Amazing!", "Beautiful!", "Awesome!"
+- Toggle behavior: Click again to remove
+- Unique constraint prevents duplicate reactions (userId + sharedItemId + reactionType)
+- Displayed with user avatars
+
+**Safety Features:**
+- Invite-only (no public discovery)
+- Owner controls (can remove members/shared items)
+- No free-text comments (preset reactions + compliments only)
+- Orphaned shares cleanup (when design deleted, removes associated shared items)
+
+---
+
+## 🐛 Known Issues & Resolutions
+
+### ✅ Resolved Issues
+
+#### 1. LATERAL Join Errors (Fixed 2026-02-11)
+**Status:** RESOLVED
+**Commit:** `9c36b12`
+
+**Symptom:** "Failed query" errors on catalog API endpoints
+**Cause:** Drizzle ORM generating LATERAL joins not supported by MariaDB 10.5
+**Solution:** Rewrote queries to fetch items separately using `inArray()`
+
+#### 2. Database Connection Issue (Fixed 2026-02-11)
+**Status:** RESOLVED
+**Commit:** `9c36b12`
+
+**Symptom:** App connecting to internal MariaDB 10.5 instead of external MySQL 8.0
+**Cause:** Hardcoded DATABASE_URL in supervisord.conf
+**Solution:** Updated supervisord to use environment variable interpolation
+
+---
+
+## 💾 Database Schema
+
+**Location:** `/src/lib/server/db/schema.ts` (326 lines)
+
+### Core Tables
+- `users` - User accounts (email, name, image, role)
+- `designs` - Fashion sketches (originalImageUrl, cleanedImageUrl, coloredOverlayUrl)
+- `dollTemplates` - Paper doll bases (6 templates with regions JSON)
+- `dollProjects` - Generated PDFs (designId, dollTemplateId, pieces JSON, pdfUrl)
+- `catalogs` - Fashion collections (sessionId/userId, title, shareSlug, backgroundColor, backgroundPattern)
+- `catalogItems` - Images on catalog canvas (catalogId, imageUrl, positionX, positionY, width, height, rotation, zIndex)
+
+### Sharing Tables
+- `circles` - Invite-only groups (ownerId, name, inviteCode)
+- `circleMembers` - Membership (circleId, userId, role: 'owner'/'member')
+- `sharedItems` - Shared designs/dolls (circleId, itemType: 'design'/'dollProject', itemId, sharedBy)
+- `reactions` - Emoji reactions (userId, sharedItemId, reactionType)
+- `compliments` - Preset phrases (userId, sharedItemId, complimentType)
+
+### Auth Tables
+- `sessions` - Better Auth session management (userId, expiresAt, ipAddress, userAgent)
+- `accounts` - OAuth providers (future: Google, Apple - currently unused)
+- `verifications` - Email verification tokens (optional V1, currently unused)
+
+### Key Patterns
+- All IDs use `nanoid()` (URL-safe, collision-resistant)
+- Invite codes: 8-character uppercase alphanumeric with collision retry
+- Dual-mode: Support both `sessionId` and `userId` for catalogs
+- Cascade deletes: user → designs → dollProjects, circle → members/sharedItems
+
+---
+
+## 🌐 Environment Variables
+
+### Development (.env)
+```bash
+# Database
+DATABASE_URL="mysql://wrigs_user:password@localhost:3306/wrigs_fashion"
+
+# Authentication
+AUTH_SECRET="3b56aae4402660fadd3ec79d6cb629064c560af0287798284ccf659931066367"
+
+# Application
+PUBLIC_APP_URL="http://localhost:3000"
+BETTER_AUTH_URL="http://localhost:3001"  # Optional, defaults to PUBLIC_APP_URL
+NODE_ENV="development"
+```
+
+### Docker Production (docker-compose.yml)
+```bash
+# Database
+DATABASE_URL="mysql://wrigs_user:password@wrigs-fashion-db-dev:3306/wrigs_fashion"
+
+# Authentication
+AUTH_SECRET="${AUTH_SECRET:-}"  # Generate with: openssl rand -hex 32
+
+# Application
+PUBLIC_APP_URL="https://localhost"
+NODE_ENV="production"
+```
+
+### Production Deployment
+**Before deploying to production:**
+1. Update `DATABASE_URL` with managed database credentials (PlanetScale, Railway, AWS RDS)
+2. Generate secure `AUTH_SECRET` (32 bytes hex): `openssl rand -hex 32`
+3. Set `PUBLIC_APP_URL` to production domain (e.g., `https://wrigsfashion.com`)
+4. Enable `useSecureCookies: true` in Better Auth config
+5. Set up object storage URLs (Cloudflare R2 or AWS S3)
+
+---
+
+## 📝 Testing
+
+### Playwright E2E Tests
+**Location:** `/tests/` directory
+
+**Test Coverage:**
+- Authentication flow (login, register, logout)
+- Image upload (including HEIC format)
+- Catalog CRUD operations
+- API response validation
+
+### Run Tests
+```bash
+# Run all tests
+npm test
+
+# Run in UI mode (interactive)
+npm run test:ui
+
+# Run in headed mode (see browser)
+npm run test:headed
+
+# Debug mode (step through)
+npm run test:debug
+
+# Show HTML report
+npm run test:report
+```
+
+### Manual Testing Checklist
+- [ ] Upload image (JPG, PNG, HEIC)
+- [ ] Crop and process image
+- [ ] Use all 6 editor tools
+- [ ] Create paper doll (all 6 templates)
+- [ ] Generate PDF (Letter and A4)
+- [ ] Register new account
+- [ ] Login with existing account
+- [ ] Save designs to portfolio
+- [ ] Create catalog and add items
+- [ ] Create circle and share items
+- [ ] Add reactions and compliments
+
+---
+
+## 📚 Key Documentation Files
+
+1. **CLAUDE.md** - Main project instructions for AI assistance (comprehensive guide)
+2. **HANDOFF.md** - This file (current status and handoff notes)
+3. **docs/SETUP.md** - Setup guide, commands, troubleshooting
+4. **docs/API.md** - API endpoints with request/response formats
+5. **docs/BETTER_AUTH.md** - Better Auth implementation guide
+6. **DOCKER_DEPLOYMENT.md** - Docker deployment documentation
+7. **README.md** - Project overview and quick start
+
+---
+
+## 🎯 Next Session Checklist
+
+When resuming work on this project:
+
+1. **Start services and verify status:**
+   ```bash
+   cd /root/projects/wrigs-fashion
+   docker compose up -d
+   docker ps  # Should show both wrigs-fashion and wrigs-fashion-db-dev
+   ```
+
+2. **Verify application is working:**
+   - Open https://localhost:443 (accept self-signed certificate warning)
+   - Test image upload flow
+   - Test catalog creation (verify no "Failed query" errors)
+   - Check logs: `docker logs wrigs-fashion --tail 50`
+
+3. **Review recent changes:**
+   ```bash
+   git log --oneline -10  # See recent commits
+   git show 9c36b12       # Review database fix commit
+   ```
+
+4. **Check for updates:**
+   - Review any new GitHub issues
+   - Check for dependency updates
+   - Read this HANDOFF.md document
+
+5. **Begin Phase 6 work:**
+   - Production deployment planning
+   - Set up managed MySQL database
+   - Configure object storage (Cloudflare R2)
+   - Polish UI/UX (error handling, loading states)
+
+---
+
+## 🔐 Security Considerations
+
+### Authentication
+- Better Auth with email/password (30-day session expiry)
+- Server-side session validation via `hooks.server.ts`
+- No email verification in V1 (optional for V2)
+- Password hashing handled by Better Auth
+
+### Protected Routes
+Require authentication:
+- `/portfolio`
+- `/circles`
+- `/onboarding`
+
+Public routes (work anonymously):
+- `/upload`
+- `/editor`
+- `/doll-builder`
+- `/catalogs` (anonymous users can create catalogs using sessionId)
+
+### Child Safety Features
+- Invite-only circles (no public discovery)
+- Owner controls (can remove members/items)
+- No free-text comments (preset reactions + compliments only)
+- Minimal personal data collection (nickname + avatar, not full names)
+- No direct messaging between users
+- No public profiles
+
+### Production Security TODOs
+- [ ] Enable HTTPS with valid SSL certificate (Let's Encrypt)
+- [ ] Set `useSecureCookies: true` in Better Auth config
+- [ ] Add rate limiting to auth endpoints (prevent brute force)
+- [ ] Set up error tracking (Sentry) without logging sensitive data
+- [ ] Add CSRF protection
+- [ ] Implement proper CORS configuration
+- [ ] Set up security headers (helmet.js)
+- [ ] Regular dependency updates (Dependabot)
+
+---
+
+## 💡 Design Decisions & Trade-offs
+
+### Why MySQL 8.0+ Required?
+- Drizzle ORM generates optimized SQL for modern MySQL features
+- Better performance with JSON column support
+- Full support for complex queries (window functions, CTEs)
+- MariaDB 10.5 lacks several features causing compatibility issues
+
+### Why Better Auth over NextAuth/Supabase?
+- Lightweight and TypeScript-first
+- Works seamlessly with SvelteKit
+- Flexible session management
+- No external dependencies (self-hosted)
+- Active development and good documentation
+
+### Why Hardcoded Templates (not in DB)?
+- Simplifies V1 architecture
+- Templates are static configuration (unlikely to change frequently)
+- Easier to version control (TypeScript file)
+- Can migrate to database in V2 if templates become dynamic
+
+### Why 32-Color Posterization?
+- Makes Magic Wand flood fill tool effective
+- Consolidates similar colors into distinct regions
+- Easier for kids to select and color specific areas
+- Reduces file size slightly
+
+### Why 2-Page PDF Layout?
+- Separates doll base (page 1) from outfit piece (page 2)
+- Makes printing and assembly instructions clearer
+- Allows for different paper sizes (Letter vs A4)
+- Professional appearance with cut lines and tabs
+
+---
+
+## 🎨 Design System
+
+### Theme & Colors
+- **DaisyUI Theme:** "Lemon Meringue"
+- **Color Palette:** Pastel colors appropriate for young audience
+- **Primary Color:** Soft yellow/cream
+- **Secondary Color:** Lavender/purple
+- **Accent Color:** Pink
+
+### Typography
+- **Font Stack:** Default DaisyUI system fonts
+- **Headings:** Bold, friendly, age-appropriate
+- **Body Text:** Clear, readable (14px base)
+
+### Component Style
+- **Framework:** Functional Svelte 5 components with runes
+- **State Management:** Svelte 5 `$state`, `$derived`, `$effect`
+- **Event Handlers:** Use `onchange={handler}`, NOT `on:change={handler}` (Svelte 5 syntax)
+- **No class components:** Prefer functional style
+
+### Accessibility
+- Keyboard navigation support
+- ARIA labels on interactive elements
+- High contrast mode compatibility
+- Screen reader friendly
+- Touch-friendly buttons (min 44×44px)
+
+### Design Note
+ColorCustomizer component in `+layout.svelte` should be removed before production (it's a design tool for theme testing, not a user feature).
+
+---
+
+## 📊 Project Metrics
+
+### Code Statistics
+- **Total Lines of Code:** ~15,000+ (TypeScript + Svelte + CSS)
+- **Components:** 50+ Svelte components
+- **API Endpoints:** 25+ endpoints
+- **Database Tables:** 14 tables
+- **Paper Doll Templates:** 6 SVG files
+- **Editor Tools:** 6 creative tools
+
+### Performance Targets
+- **Image upload:** <2 seconds for 5MB image
+- **Image cleanup:** <5 seconds for typical sketch photo
+- **PDF generation:** <10 seconds including storage upload
+- **Portfolio page load:** <2 seconds
+- **Catalog canvas rendering:** <1 second
+
+### File Storage
+- **Static files:** `/static/` directory
+- **Uploaded images:** `/static/uploads/`
+- **Generated PDFs:** `/static/pdfs/`
+- **Doll templates:** `/static/templates/dolls/`
+
+---
+
+## 🔄 Development Workflow
+
+### Local Development
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev  # Opens on http://localhost:5173
+
+# Start database
+docker compose up -d wrigs-fashion-db-dev
+
+# Run migrations
+npm run db:generate
 npm run db:migrate
 
-# Open Drizzle Studio to verify
+# Open Drizzle Studio
 npm run db:studio
 ```
 
-### 3. Portfolio CRUD (HIGH PRIORITY - Phase 3)
-**Why:** Users need to see, manage, and re-download their saved designs.
-
-**Tasks:**
-1. Build portfolio listing page (`/portfolio`)
-2. Show all user's designs (grid layout with thumbnails)
-3. Show all user's paper doll projects
-4. Add delete functionality (with confirmation)
-5. Add re-download functionality for PDFs
-6. Add design detail page (view larger, see metadata)
-
-**Acceptance criteria:**
-- Portfolio shows all designs for logged-in user
-- Designs display with thumbnails
-- Users can delete designs (with confirmation modal)
-- Users can re-download generated PDFs
-- Empty state shown when no designs exist
-
-**Files to create:**
-- `/src/routes/portfolio/+page.svelte` - Portfolio listing
-- `/src/routes/portfolio/+page.server.ts` - Load user designs from DB
-- `/src/routes/designs/[id]/+page.svelte` - Design detail page
-- `/src/routes/api/designs/[id]/+server.ts` - Delete design endpoint
-
-### 4. Polish & UX Improvements (MEDIUM PRIORITY)
-**Tasks:**
-- Remove ColorCustomizer from production layout
-- Add loading states for PDF generation (progress bar)
-- Add success toasts/notifications
-- Add error handling UI (friendly error messages)
-- Add empty states for portfolio
-- Add onboarding flow for first-time users
-
----
-
-## Open Questions (Need Decisions)
-
-1. **Authentication approach confirmation:**
-   - Proceed with Lucia Auth? (Recommendation: YES)
-   - Or switch to Supabase Auth / NextAuth?
-   - Email + password or magic link?
-
-2. **Database hosting:**
-   - Local MySQL for dev (continue as-is)
-   - Production: PlanetScale, Supabase, or Neon Postgres?
-   - When to deploy to production? (Recommendation: After Phase 3)
-
-3. **Portfolio features:**
-   - Should users be able to edit saved designs? (Recommendation: NO for V1, add in V1.1)
-   - Should users name their designs? (Recommendation: YES, add title field)
-   - Should users tag designs? (Recommendation: NO for V1)
-
-4. **PDF storage strategy:**
-   - Keep generated PDFs forever? (storage cost)
-   - Or regenerate on-demand from saved placement data?
-   - Recommendation: Keep PDFs (faster, better UX)
-
----
-
-## Known Issues
-
-### Issue 1: Permission Errors with .svelte-kit
-**Problem:** When dev server runs via Docker or sudo, `.svelte-kit` directory gets owned by root, causing permission errors.
-
-**Symptom:**
-```
-Error: EACCES: permission denied, open '.svelte-kit/...'
-```
-
-**Solution:**
+### Docker Development
 ```bash
-sudo pkill -9 -f "vite dev"
-sudo rm -rf .svelte-kit
-npm run dev
+# Build and start containers
+docker compose up --build -d
+
+# View logs
+docker compose logs -f
+
+# Stop containers
+docker compose down
+
+# Rebuild after code changes
+docker compose build --no-cache
+docker compose up -d
 ```
 
-**Prevention:** Don't run dev server with sudo. Use regular user account.
-
-### Issue 2: ColorCustomizer in Layout
-**Problem:** ColorCustomizer component is still in `+layout.svelte` (visible to all users).
-
-**Why:** It's a design tool, not a user feature.
-
-**Solution:** Remove from `+layout.svelte` before production deployment. Keep component file for future design sessions.
-
-**File:** `/home/grifin/projects/wrigs-fashion/src/routes/+layout.svelte`
-
-### Issue 3: No Authentication Yet
-**Problem:** No user system, all uploads are anonymous.
-
-**Impact:** Can't save designs to portfolio or implement sharing features.
-
-**Timeline:** Implement in Phase 3 (next priority).
-
-### Issue 4: Multiple Vite Processes Running
-**Problem:** Multiple Vite dev server instances running (check with `ps aux | grep vite`).
-
-**Impact:** May cause port conflicts or resource usage.
-
-**Solution:**
+### Git Workflow
 ```bash
-# Kill all Vite processes
-pkill -9 -f "vite dev"
+# Check status
+git status
 
-# Restart dev server
-npm run dev
+# View recent commits
+git log --oneline -10
+
+# Create commit
+git add <files>
+git commit -m "fix: description of fix
+
+Detailed explanation...
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+
+# Push to GitHub
+git push origin main
 ```
 
 ---
 
-## Technical Context for Next Session
+## 📞 Support & Resources
 
-### Paper Doll System Architecture
+### Documentation
+- **Better Auth Docs:** https://better-auth.com/docs
+- **Drizzle ORM Docs:** https://orm.drizzle.team/docs
+- **SvelteKit Docs:** https://kit.svelte.dev/docs
+- **DaisyUI Docs:** https://daisyui.com/components
+- **Playwright Docs:** https://playwright.dev/docs
 
-**Template System:**
-- Templates defined in TypeScript (not database yet)
-- Each template has metadata: pose, bodyType, regions
-- Regions define where outfits fit (coordinates)
-- SVG templates stored in static/templates/dolls/
+### Project Resources
+- **GitHub Repository:** https://github.com/ngriffin1978/wrigs-fashion
+- **GitHub Issues:** https://github.com/ngriffin1978/wrigs-fashion/issues
+- **Project Directory:** `/root/projects/wrigs-fashion`
 
-**Placement System:**
-- Canvas-based UI (HTML5 Canvas)
-- User drags/scales design onto doll
-- Placement data stored: category, x, y, scale, rotation
-- Canvas renders: doll template + design overlay + region outline
-
-**PDF Generation:**
-- Server-side with PDFKit
-- 2-page layout: doll base + outfit piece
-- Outfit piece uses placement data to position design
-- Cut lines drawn with dashed strokes
-- Tabs added for folding/attachment
-
-**Data Flow:**
-```
-Editor → Click "Create Paper Doll"
-  ↓
-Template Selection (filter by pose/body type)
-  ↓
-Design Placement (drag/scale on canvas)
-  ↓
-API Call: POST /api/generate-pdf
-  ↓
-PDF Generation (PDFKit service)
-  ↓
-PDF saved to static/pdfs/
-  ↓
-Download link returned to user
-```
-
-### Image Processing Pipeline (Recap)
-**Steps:**
-1. Upload (drag-and-drop)
-2. Freeform crop (canvas path drawing)
-3. Server-side processing (Sharp.js):
-   - Resize to max 2000px
-   - Brightness boost (1.4x)
-   - Saturation boost (1.5x)
-   - Normalize (push background to white)
-   - Posterize to 32 colors (for Magic Wand tool)
-   - Sharpen edges
-   - Add neutral gray padding
-4. Save as PNG in static/uploads/
-
-**Why 32 colors?** Makes Magic Wand tool effective by consolidating similar colors.
-
-### Svelte 5 Runes Used
-- `$state` - Reactive variables
-- `$effect` - Side effects (e.g., canvas rendering)
-- `$derived` - Computed values (not heavily used yet)
-
-**Event Handlers:** Use `onchange`, not `on:change` (new Svelte 5 syntax).
-
----
-
-## Files Modified This Session
-
-### New Files Created
-1. `/home/grifin/projects/wrigs-fashion/src/lib/data/doll-templates.ts` - Template metadata (184 lines)
-2. `/home/grifin/projects/wrigs-fashion/src/lib/services/pdf-generator.ts` - PDF generation service (333 lines)
-3. `/home/grifin/projects/wrigs-fashion/src/routes/api/generate-pdf/+server.ts` - PDF API endpoint (65 lines)
-4. `/home/grifin/projects/wrigs-fashion/src/routes/doll-builder/+page.svelte` - Template selection UI (262 lines)
-5. `/home/grifin/projects/wrigs-fashion/src/routes/doll-builder/place/+page.svelte` - Placement UI (384 lines)
-6. `/home/grifin/projects/wrigs-fashion/static/templates/dolls/pose-a-average.svg` - Doll template
-7. `/home/grifin/projects/wrigs-fashion/static/templates/dolls/pose-a-curvy.svg` - Doll template
-8. `/home/grifin/projects/wrigs-fashion/static/templates/dolls/pose-a-petite.svg` - Doll template
-9. `/home/grifin/projects/wrigs-fashion/static/templates/dolls/pose-b-average.svg` - Doll template
-10. `/home/grifin/projects/wrigs-fashion/static/templates/dolls/pose-b-curvy.svg` - Doll template
-11. `/home/grifin/projects/wrigs-fashion/static/templates/dolls/pose-b-petite.svg` - Doll template
-
-### Modified Files
-1. `/home/grifin/projects/wrigs-fashion/src/routes/editor/+page.svelte` - Added "Create Paper Doll" button
-2. `/home/grifin/projects/wrigs-fashion/package.json` - Added PDFKit dependency
-3. `/home/grifin/projects/wrigs-fashion/CLAUDE.md` - Updated milestones, phase status
-4. `/home/grifin/projects/wrigs-fashion/README.md` - Updated with Phase 2 completion
-5. `/home/grifin/projects/wrigs-fashion/HANDOFF.md` - This file (complete rewrite)
-
----
-
-## Quick Commands for Tomorrow
-
+### Key Commands Reference
 ```bash
-# Start dev server (if not running)
-npm run dev
+# Development
+npm run dev              # Start dev server
+npm run build            # Build for production
+npm run preview          # Preview production build
+npm test                 # Run Playwright tests
 
-# If permission errors occur:
-sudo pkill -9 -f "vite dev"
-sudo rm -rf .svelte-kit
-npm run dev
+# Database
+npm run db:generate      # Generate migrations
+npm run db:migrate       # Apply migrations
+npm run db:push          # Push schema to DB
+npm run db:studio        # Open Drizzle Studio
 
-# Check running processes
-ps aux | grep vite
+# Docker
+docker compose up -d     # Start services
+docker compose down      # Stop services
+docker compose logs -f   # View logs
+docker compose build     # Rebuild images
 
-# Test complete flow:
-# 1. Open http://localhost:3001/upload
-# 2. Upload an image → Crop → Process → Edit
-# 3. Click "Create Paper Doll"
-# 4. Select a template (try different poses/body types)
-# 5. Place design on canvas
-# 6. Generate PDF (try both Letter and A4)
-# 7. Download and print to verify quality
-
-# Install auth library (when ready for Phase 3):
-# Lucia Auth already installed, just needs setup
-
-# Database setup (when ready):
-npm run db:generate  # Generate migrations
-npm run db:migrate   # Apply to database
-npm run db:studio    # Open GUI to verify
+# Logs
+docker logs wrigs-fashion --follow
+docker exec wrigs-fashion tail -f /var/log/supervisor/sveltekit_error.log
 ```
 
 ---
 
-## Session Metrics
+## ✨ What Makes This Project Special
 
-- **Session Duration:** ~3 hours
-- **Lines of Code Written:** ~1,228 (TypeScript + Svelte)
-- **Features Completed:** 4 major (templates, selection UI, placement UI, PDF generation)
-- **Files Created:** 11 (5 TypeScript/Svelte + 6 SVG templates)
-- **Templates Designed:** 6 inclusive paper doll templates
-- **PDF Tests:** 2 successful PDFs generated and verified
-- **Dev Server Uptime:** Running continuously on port 3001
-
----
-
-## Context for Resuming Work
-
-### What Works Right Now
-1. **Complete upload → edit flow** (from Phase 1)
-2. **Full paper doll system** (from Phase 2):
-   - 6 inclusive templates (2 poses × 3 body types)
-   - Template selection with filters
-   - Interactive placement with live preview
-   - PDF generation with cut lines and tabs
-3. **End-to-end tested** from sketch photo to printable PDF
-
-### What's Missing (Critical Path to MVP)
-1. **Authentication** (users can't save work yet)
-2. **Database integration** (no persistence)
-3. **Portfolio CRUD** (can't view/manage saved designs)
-4. **Sharing & Circles** (invite-only sharing system)
-
-### Decision: What to Build Next?
-**Recommendation: Authentication + Database Integration (Phase 3)**
-
-**Why this order:**
-1. Auth is foundational for all other features
-2. Database integration follows naturally after auth
-3. Portfolio depends on both auth + database
-4. Sharing depends on all three
-
-**Alternative approach:** Could build portfolio with localStorage first (no auth), but this creates throwaway work.
-
-**Best path:** Implement proper auth + database now, then portfolio and sharing will be straightforward.
+1. **Kid-Friendly Focus:** Designed specifically for young girls interested in fashion design
+2. **Inclusive Templates:** 3 body types (Classic, Curvy, Petite) with positive labels
+3. **Safety First:** Invite-only circles, no free-text comments, minimal personal data
+4. **Real Printable Output:** Professional PDFs with cut lines and fold tabs
+5. **Complete Creative Flow:** Upload sketch → edit → place on doll → print
+6. **Modern Tech Stack:** Svelte 5, Better Auth, Drizzle ORM, Docker
+7. **Mobile-Friendly:** Touch controls for tablets (primary target device)
+8. **HEIC Support:** Works with iPhone/iPad photos out of the box
 
 ---
 
-## Important Notes
+## 🎯 Vision for V2 (Future)
 
-1. **Dev server port:** 3001 (not 3000 - already in use)
-2. **Image storage:** All images in `static/uploads/` (accessible via `/uploads/` URL)
-3. **PDF storage:** All PDFs in `static/pdfs/` (accessible via `/pdfs/` URL)
-4. **Template storage:** All templates in `static/templates/dolls/` (accessible via `/templates/dolls/` URL)
-5. **Paper doll system:** Fully functional, end-to-end tested
-6. **Inclusive design:** 3 body types with positive labels (no body shaming)
-7. **Print-ready PDFs:** Both Letter and A4 sizes supported with proper margins
-
----
-
-## Design Insights from Session
-
-1. **Inclusive body representation matters:** Having 3 body types (Classic, Curvy, Petite) shows thoughtfulness and care for diverse users.
-
-2. **Template filtering is essential:** With 6 templates, users need easy filtering by pose and body type to find what they want quickly.
-
-3. **Canvas preview is crucial:** Seeing the design on the doll before generating the PDF prevents wasted prints and builds confidence.
-
-4. **2-page PDF works well:** Separating doll base (page 1) and outfit piece (page 2) makes printing and assembly clear.
-
-5. **Cut lines need to be visible:** Gray dashed lines (#999) are visible without being overwhelming.
-
-6. **Fold tabs need labels:** Small "fold" text on tabs helps kids understand what to do.
+### Potential Features
+- **AI Background Removal:** More advanced processing with machine learning
+- **Custom Templates:** Let users create their own doll templates
+- **Animation:** Animated paper dolls (digital wardrobe)
+- **Real-Time Collaboration:** Multiple users editing same design
+- **Mobile App:** Native iOS/Android apps
+- **Parent Dashboard:** Parent controls and moderation tools
+- **Age Gating:** COPPA-compliant age verification
+- **OAuth Providers:** Sign in with Google, Apple
+- **Marketplace:** Share and download designs from community (moderated)
+- **Print Service Integration:** Order professional prints directly
 
 ---
 
-## Next Session Start Checklist
+**End of Handoff Document**
 
-- [ ] Verify dev server running on port 3001
-- [ ] Test full paper doll flow (upload → edit → template → place → PDF)
-- [ ] Decide on authentication approach (Lucia Auth recommended)
-- [ ] Set up database connection (MySQL locally, plan for production hosting)
-- [ ] Review Lucia Auth documentation
-- [ ] Plan user schema (email, password hash, sessions)
-- [ ] Design login/register UI mockups
+**Status:** Ready for Phase 6 - Polish & Production Deployment
+**Critical Issues:** None - All systems operational
+**Last Major Fix:** Database compatibility (2026-02-11)
+**Next Milestone:** Production deployment with managed infrastructure
 
----
-
-**Ready to resume! Phase 2 complete, moving to Phase 3: Authentication + Database Integration.**
-
-**Key files to know:**
-- Upload: `/home/grifin/projects/wrigs-fashion/src/routes/upload/+page.svelte`
-- Editor: `/home/grifin/projects/wrigs-fashion/src/routes/editor/+page.svelte`
-- Template selection: `/home/grifin/projects/wrigs-fashion/src/routes/doll-builder/+page.svelte`
-- Design placement: `/home/grifin/projects/wrigs-fashion/src/routes/doll-builder/place/+page.svelte`
-- PDF service: `/home/grifin/projects/wrigs-fashion/src/lib/services/pdf-generator.ts`
-- API: `/home/grifin/projects/wrigs-fashion/src/routes/api/generate-pdf/+server.ts`
-- Templates: `/home/grifin/projects/wrigs-fashion/static/templates/dolls/`
+_This document should be updated before each extended break from the project to ensure smooth continuity when resuming work._
