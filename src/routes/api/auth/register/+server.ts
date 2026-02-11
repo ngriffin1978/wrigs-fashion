@@ -32,56 +32,56 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw error(400, 'Someone already has that email. Try logging in instead! 🔐');
 		}
 
-		// Create a proper Request for Better Auth
-		const signUpRequest = new Request('http://localhost/api/auth/sign-up/email', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
+		// Use Better Auth's server API directly with asResponse flag
+		const signUpResult = await auth.api.signUpEmail({
+			body: {
 				email: email.toLowerCase(),
 				password,
 				name: nickname
-			})
+			},
+			asResponse: true
 		});
 
-		// Call Better Auth's signUp handler
-		const signUpResponse = await auth.handler(signUpRequest);
-		const signUpData = await signUpResponse.json();
-
-		if (!signUpResponse.ok || !signUpData.user) {
-			console.error('Better Auth signup failed:', signUpData);
-			throw error(500, signUpData.error?.message || 'Failed to create account. Please try again! 😅');
+		if (!signUpResult || !signUpResult.ok) {
+			const errorText = await signUpResult?.text();
+			console.error('Better Auth signup failed:', errorText);
+			throw error(500, 'Failed to create account. Please try again! 😅');
 		}
 
-		// Create a proper Request for Better Auth sign-in
-		const signInRequest = new Request('http://localhost/api/auth/sign-in/email', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
+		const signUpData = await signUpResult.json();
+		if (!signUpData.user) {
+			console.error('Better Auth signup succeeded but no user returned');
+			throw error(500, 'Failed to create account. Please try again! 😅');
+		}
+
+		// Now sign in to create a session
+		const signInResult = await auth.api.signInEmail({
+			body: {
 				email: email.toLowerCase(),
 				password
-			})
+			},
+			asResponse: true
 		});
 
-		// Sign in the user to get a session
-		const signInResponse = await auth.handler(signInRequest);
-		const signInData = await signInResponse.json();
+		if (!signInResult || !signInResult.ok) {
+			const errorText = await signInResult?.text();
+			console.error('Better Auth signin after signup failed:', errorText);
+			throw error(500, 'Account created but login failed. Please try logging in! 🔑');
+		}
 
-		if (!signInResponse.ok || !signInData.user) {
-			console.error('Better Auth signin failed:', signInData);
+		const signInData = await signInResult.json();
+		if (!signInData.user || !signInData.session) {
+			console.error('Better Auth signin succeeded but no session');
 			throw error(500, 'Account created but login failed. Please try logging in! 🔑');
 		}
 
 		// Set session cookie from Better Auth response
-		const setCookieHeader = signInResponse.headers.get('set-cookie');
+		const setCookieHeader = signInResult.headers.get('set-cookie');
 		if (setCookieHeader) {
-			// Parse and set the session cookie
-			const cookieMatch = setCookieHeader.match(/([^=]+)=([^;]+)/);
-			if (cookieMatch) {
-				cookies.set(cookieMatch[1], cookieMatch[2], {
+			// Better Auth sets the cookie with format: wrigs_session=token; ...
+			const cookieParts = setCookieHeader.split(';')[0].split('=');
+			if (cookieParts.length === 2) {
+				cookies.set(cookieParts[0].trim(), cookieParts[1].trim(), {
 					path: '/',
 					httpOnly: true,
 					sameSite: 'lax',
@@ -119,6 +119,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw err;
 		}
 		console.error('Registration error:', err);
+		console.error('Error message:', err.message);
+		console.error('Error stack:', err.stack);
 		throw error(500, 'Something went wrong! Please try again 😅');
 	}
 };

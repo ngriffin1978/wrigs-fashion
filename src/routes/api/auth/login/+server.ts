@@ -19,34 +19,34 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw error(400, emailValidation.error!);
 		}
 
-		// Create a proper Request for Better Auth
-		const signInRequest = new Request('http://localhost/api/auth/sign-in/email', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
+		// Use Better Auth's server API directly with asResponse flag
+		const signInResult = await auth.api.signInEmail({
+			body: {
 				email: email.toLowerCase(),
 				password
-			})
+			},
+			asResponse: true
 		});
 
-		// Call Better Auth's signIn handler
-		const signInResponse = await auth.handler(signInRequest);
-		const signInData = await signInResponse.json();
+		if (!signInResult || !signInResult.ok) {
+			const errorText = await signInResult?.text();
+			console.error('Better Auth signin failed:', errorText);
+			throw error(401, "Hmm, that password doesn't match. Try again! 🔑");
+		}
 
-		if (!signInResponse.ok || !signInData.user) {
-			console.error('Better Auth signin failed:', signInData);
+		const signInData = await signInResult.json();
+		if (!signInData.user || !signInData.session) {
+			console.error('Better Auth signin succeeded but no session');
 			throw error(401, "Hmm, that password doesn't match. Try again! 🔑");
 		}
 
 		// Set session cookie from Better Auth response
-		const setCookieHeader = signInResponse.headers.get('set-cookie');
+		const setCookieHeader = signInResult.headers.get('set-cookie');
 		if (setCookieHeader) {
-			// Parse and set the session cookie
-			const cookieMatch = setCookieHeader.match(/([^=]+)=([^;]+)/);
-			if (cookieMatch) {
-				cookies.set(cookieMatch[1], cookieMatch[2], {
+			// Better Auth sets the cookie with format: wrigs_session=token; ...
+			const cookieParts = setCookieHeader.split(';')[0].split('=');
+			if (cookieParts.length === 2) {
+				cookies.set(cookieParts[0].trim(), cookieParts[1].trim(), {
 					path: '/',
 					httpOnly: true,
 					sameSite: 'lax',

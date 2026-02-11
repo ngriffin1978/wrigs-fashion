@@ -29,7 +29,7 @@ export default defineConfig({
 	/* Shared settings for all the projects below */
 	use: {
 		/* Base URL to use in actions like `await page.goto('/')` */
-		baseURL: 'https://srv1315945.hstgr.cloud',
+		baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
 
 		/* Ignore HTTPS certificate errors (self-signed cert) */
 		ignoreHTTPSErrors: true,

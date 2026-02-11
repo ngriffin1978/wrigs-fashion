@@ -9,9 +9,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			headers: request.headers
 		});
 
-		// Clear all auth-related cookies
-		const cookieName = 'wrigs.session_token';
-		cookies.delete(cookieName, { path: '/' });
+		// Clear the session cookie (Better Auth uses wrigs_session)
+		cookies.delete('wrigs_session', { path: '/' });
 
 		return json({
 			success: true,
@@ -22,7 +21,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		console.error('Logout error:', err);
 		// Even if there's an error, clear the cookie and return success
 		// to prevent the user from being stuck
-		cookies.delete('wrigs.session_token', { path: '/' });
+		cookies.delete('wrigs_session', { path: '/' });
 
 		return json({
 			success: true,

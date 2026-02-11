@@ -33,7 +33,11 @@
 		}
 	}
 
-	async function handleSubmit() {
+	async function handleSubmit(event?: Event) {
+		if (event) {
+			event.preventDefault();
+		}
+
 		errors = {};
 
 		// Client-side validation
@@ -97,7 +101,7 @@
 			</div>
 
 			<!-- Registration Form -->
-			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+			<form onsubmit={handleSubmit} method="dialog">
 				<!-- Email Field -->
 				<div class="form-control mb-4">
 					<label class="label" for="email">
