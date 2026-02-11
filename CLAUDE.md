@@ -9,8 +9,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **V1 Theme:** Draw it → digitize it → make a printable paper doll (PDF)
 **Primary goal:** A delightful, safe creative flow that works great on tablets and laptops.
 
-**Current Status:** Phase 3 Complete (Authentication + Database Integration + Catalog Migration)
-**Next Phase:** Sharing + Circles (Phase 5)
+**Current Status:** Phase 5 Complete (Circles + Sharing System)
+**Next Phase:** Polish & Deploy (Phase 6)
 
 ---
 
@@ -83,10 +83,13 @@ Wrigs Fashion is a web app where kids can:
 - ✅ Multiple doll body types (3 body types)
 - ✅ More poses (2 poses)
 - ✅ Achievement badges and stats
+- ✅ Basic Circles (invite-only) + sharing
+- ✅ Reactions + preset compliments
+- ✅ Docker deployment setup
 
 **Remaining for V1:**
-- 📋 Basic Circles (invite-only) + sharing
-- 📋 Deploy to production (single web app + managed DB + object storage)
+- 📋 Deploy to production (managed DB + object storage)
+- 📋 Production polish (error handling, empty states, loading states)
 
 ---
 
@@ -149,27 +152,32 @@ Wrigs Fashion is a web app where kids can:
 - positionX, positionY, width, height, rotation, zIndex
 - createdAt
 
-### Sharing Tables (Planned)
+### Sharing Tables (✅ Implemented)
 
 **circles** (invite-only groups)
-- id (varchar PK), ownerId (FK), name, inviteCode (unique)
+- id (varchar PK), ownerId (FK), name, inviteCode (unique, 8-char uppercase)
 - createdAt
+- Cascade delete: members, sharedItems
 
 **circleMembers**
-- id (varchar PK), circleId (FK), userId (FK), role
+- id (varchar PK), circleId (FK), userId (FK), role (owner/member)
 - joinedAt
+- Unique constraint: (circleId, userId) - prevents duplicate membership
 
 **sharedItems**
-- id (varchar PK), circleId (FK), itemType, itemId, sharedBy (FK)
-- createdAt
+- id (varchar PK), circleId (FK), itemType (design/doll), itemId (design/doll PK)
+- sharedBy (FK to users), createdAt
+- No FK to designs/dolls (allows orphaned cleanup)
 
 **reactions** (emoji reactions)
-- id (varchar PK), userId (FK), sharedItemId (FK), reactionType
+- id (varchar PK), userId (FK), sharedItemId (FK), reactionType (emoji string)
 - createdAt
+- Unique constraint: (userId, sharedItemId, reactionType) - prevents duplicate reactions
 
 **compliments** (preset phrases)
-- id (varchar PK), userId (FK), sharedItemId (FK), complimentType
+- id (varchar PK), userId (FK), sharedItemId (FK), complimentType (preset string)
 - createdAt
+- No uniqueness constraint: can give same compliment multiple times
 
 ### ID Generation
 Use `nanoid()` for all IDs (URL-safe, collision-resistant, shorter than UUID)
@@ -273,16 +281,20 @@ Use `nanoid()` for all IDs (URL-safe, collision-resistant, shorter than UUID)
    - Achievement badges and stats
    - Empty state with call-to-action
 
-6) 📋 **Phase 5:** Sharing + Circles (NEXT)
-   - Invite-only circles
-   - Share designs/dolls to circles
-   - Reactions + preset compliments
+6) ✅ **Phase 5:** Sharing + Circles (DONE)
+   - Invite-only circles with 8-character invite codes
+   - Share designs/dolls to multiple circles at once
+   - Emoji reactions (6 kid-friendly options)
+   - Preset compliments (5 encouraging phrases)
+   - Circle member management
+   - Shared items feed with hydrated data
 
-7) 📋 **Phase 6:** Polish & Deploy
-   - Onboarding flow
-   - Empty states
-   - Error handling UX
-   - Production deployment
+7) 📋 **Phase 6:** Polish & Deploy (NEXT)
+   - Production deployment with managed DB + object storage
+   - Error handling and loading states
+   - Rate limiting for auth endpoints
+   - Production security hardening
+   - Performance optimization
 
 ---
 
@@ -366,9 +378,10 @@ DATABASE_URL="mysql://user:pass@localhost:3306/wrigs_fashion"
 
 ### Image Processing
 - Max upload size: 10MB
-- Supported formats: JPG, PNG, HEIC
+- Supported formats: JPG, PNG, HEIC/HEIF (iOS photos)
 - Processing timeout: 30 seconds
 - Max dimension after resize: 2000px
+- HEIC support: Added Sharp.js dependencies for iOS photo uploads (Feb 2026)
 
 ### PDF Generation
 - Page sizes: US Letter (8.5x11) and A4 (210x297mm)
@@ -436,7 +449,8 @@ npm run dev
 - ✅ Phase 2.5: Catalog System (bonus feature)
 - ✅ Phase 3: Authentication + Database Integration
 - ✅ Phase 4: Portfolio CRUD + User Management
-- 📋 Phase 5 (NEXT): Sharing + Circles
+- ✅ Phase 5: Sharing + Circles
+- 📋 Phase 6 (NEXT): Polish & Deploy
 
 ### Common Commands
 
@@ -609,7 +623,46 @@ npm install
   ✅ designs/[id]/+server.ts
      - DELETE: Delete design from portfolio (auth required)
 
-  📋 circles/ - Planned (Phase 5)
+  ✅ circles/+server.ts
+     - GET: List all circles user is part of (owned or member)
+     - POST: Create new circle with auto-generated invite code
+
+  ✅ circles/[id]/+server.ts
+     - GET: Get circle details with members and shared items
+     - PATCH: Update circle name (owner only)
+     - DELETE: Delete circle (owner only, cascades to members)
+
+  ✅ circles/[id]/members/+server.ts
+     - GET: List members with user details
+     - DELETE: Remove member (owner can remove anyone, body: { userId })
+
+  ✅ circles/[id]/leave/+server.ts
+     - POST: Leave circle (members only, owner cannot leave)
+
+  ✅ circles/[id]/items/+server.ts
+     - GET: Get shared items with hydrated design/doll data
+     - DELETE: Remove shared item (sharer or owner)
+
+  ✅ circles/[id]/share/+server.ts
+     - POST: Share single item to one circle
+
+  ✅ circles/join/+server.ts
+     - POST: Join circle via invite code (case-insensitive)
+
+  ✅ share/+server.ts
+     - POST: Batch share to multiple circles at once
+
+  ✅ shared-items/[id]/+server.ts
+     - GET: Get single shared item with full details
+
+  ✅ shared-items/[id]/react/+server.ts
+     - POST: Toggle emoji reaction on shared item
+
+  ✅ shared-items/[id]/reactions/+server.ts
+     - GET: Get all reactions/compliments with user data
+
+  ✅ shared-items/[id]/compliment/+server.ts
+     - POST: Add preset compliment to shared item
 ```
 
 ### Pages (Implemented)
@@ -628,6 +681,9 @@ npm install
   ✅ auth/register/+page.svelte - User registration
   ✅ auth/login/+page.svelte - User login
   ✅ onboarding/+page.svelte - Post-signup onboarding flow
+  ✅ circles/+page.svelte - Circles listing grid (auth required)
+  ✅ circles/[id]/+page.svelte - Circle detail with members and shared items
+  ✅ circles/join/+page.svelte - Join circle via invite code
 ```
 
 ### Components (Implemented)
@@ -640,12 +696,69 @@ npm install
      - AddToCatalogModal.svelte - Add items modal
      - CatalogShareModal.svelte - Share link modal
 
+  ✅ circles/
+     - CircleCard.svelte - Circle card for grid display
+     - CreateCircleModal.svelte - Create circle form
+     - InviteCodeModal.svelte - Display/copy invite code
+     - JoinCircleModal.svelte - Join via code input
+     - ShareToCircleModal.svelte - Multi-select circles for sharing
+     - SharedItemCard.svelte - Shared item with preview
+     - ReactionBar.svelte - Emoji reactions with toggle
+     - ComplimentPicker.svelte - Preset compliment selector
+     - ComplimentsList.svelte - Display compliments list
+     - EmptyState.svelte - Reusable empty state component
+
   ✅ ColorCustomizer.svelte - Design tool (remove from production)
 ```
 
 ---
 
-## 16) Hosting (Affordable)
+## 16) Hosting & Deployment
+
+### Docker Deployment (✅ Implemented)
+
+Complete Docker setup for containerized deployment:
+
+**Quick Start:**
+```bash
+./docker-run.sh  # Builds image, generates secrets, starts container
+```
+
+**What's Included:**
+- SvelteKit app (Node.js 18)
+- MySQL 8.0 database
+- Nginx reverse proxy with HTTPS (port 443)
+- Supervisor process manager
+- Self-signed SSL certificate for localhost
+
+**Manual Deployment:**
+```bash
+docker-compose build
+docker-compose up -d
+docker-compose logs -f
+```
+
+**Access:**
+- HTTPS: https://localhost:443
+- HTTP: http://localhost:80 (redirects to HTTPS)
+
+**Files:**
+- `Dockerfile` - Multi-stage build with all dependencies
+- `docker-compose.yml` - Service orchestration
+- `docker-run.sh` - Automated setup script
+- `supervisord.conf` - Process management
+- `nginx.conf` - HTTPS reverse proxy config
+
+**Environment Variables:**
+Required in `.env`:
+- `NODE_ENV=production`
+- `DATABASE_URL` (MySQL connection string)
+- `PUBLIC_APP_URL` (app URL with protocol)
+- `AUTH_SECRET` (32-char random key)
+
+See `DOCKER_DEPLOYMENT.md` for full documentation.
+
+### Production Hosting (Planned)
 Initial recommendation:
 - Vercel for web app
 - Supabase for Postgres + Storage + Auth
@@ -981,6 +1094,46 @@ Pattern overlays: dots, stripes, stars, hearts, sparkles
 
 **Migration to auth:** When user signs up, migrate catalogs from sessionId to userId.
 
+### Circle & Sharing System (Phase 5)
+**Location:** Multiple files (see Phase 5 summary)
+
+**Key Architecture:**
+- **Invite Codes:** 8-character uppercase alphanumeric (e.g., "ABCD1234")
+- **Collision Prevention:** Retry logic (up to 5 attempts) with uniqueness check
+- **Case-Insensitive Matching:** Codes normalized to uppercase before lookup
+- **Membership Roles:** Owner (cannot leave, must delete circle) vs Member (can leave)
+
+**Sharing Flow:**
+1. User creates/owns/joins circles
+2. From portfolio: "Share to Circle" → multi-select modal
+3. Batch API: Share to multiple circles at once (`POST /api/share`)
+4. Shared item stored with `itemType` (design/doll) and `itemId`
+5. Feed loads with **hydrated data** (design/doll details)
+
+**Reactions & Compliments:**
+- **6 emoji reactions:** ❤️ 😍 👏 ✨ 🔥 😊
+- **5 preset compliments:** "So creative!", "Love it!", "Amazing!", "Beautiful!", "Awesome!"
+- Toggle behavior: Click again to remove reaction
+- Stored with userId to prevent duplicates
+- Displayed with user avatars
+
+**Safety Features:**
+- Invite-only (no public discovery)
+- Owner controls (can remove members/items)
+- No free-text comments (preset only)
+- Orphaned shares cleanup (when design deleted)
+
+**Database Relations:**
+```
+circles
+  ├─ owner (user)
+  ├─ members (circleMembers → users)
+  └─ sharedItems
+      ├─ sharedBy (user)
+      ├─ reactions (users)
+      └─ compliments (users)
+```
+
 ---
 
 ## 21) Known Issues & TODOs
@@ -997,11 +1150,13 @@ Pattern overlays: dots, stripes, stars, hearts, sparkles
 - ❌ Set up error tracking (Sentry or similar)
 - ❌ Add rate limiting to auth endpoints
 
-### Missing Features (Phase 5)
-- ❌ Sharing circles (invite-only groups)
-- ❌ Share designs to circles
-- ❌ Reactions/compliments on shared items
-- ❌ Circle management UI
+### Phase 5 Complete ✅
+All circle/sharing features have been implemented:
+- ✅ Sharing circles (invite-only groups)
+- ✅ Share designs to circles (batch + single)
+- ✅ Emoji reactions (6 kid-friendly options)
+- ✅ Preset compliments (5 encouraging phrases)
+- ✅ Circle management UI (create, join, leave, member management)
 
 ### File Storage Strategy
 **Current (Development):** Local static files in `/static/uploads/` and `/static/pdfs/`
@@ -1024,6 +1179,9 @@ Pattern overlays: dots, stripes, stars, hearts, sparkles
 - `/src/routes/auth/register/+page.svelte` - Registration form (234 lines)
 - `/src/routes/auth/login/+page.svelte` - Login form
 - `/src/routes/onboarding/+page.svelte` - Post-signup onboarding
+- `/src/routes/circles/+page.svelte` - Circles listing grid
+- `/src/routes/circles/[id]/+page.svelte` - Circle detail with feed
+- `/src/routes/circles/join/+page.svelte` - Join via invite code
 
 **API Endpoints:**
 - `/src/routes/api/auth/register/+server.ts` - User registration + catalog migration (125 lines)
@@ -1033,6 +1191,9 @@ Pattern overlays: dots, stripes, stars, hearts, sparkles
 - `/src/routes/api/generate-pdf/+server.ts` - PDF generation (40 lines)
 - `/src/routes/api/catalogs/` - Catalog CRUD endpoints
 - `/src/routes/api/designs/` - Design CRUD endpoints
+- `/src/routes/api/circles/` - Circle management (create, list, update, delete)
+- `/src/routes/api/share/+server.ts` - Batch sharing to multiple circles
+- `/src/routes/api/shared-items/` - Reactions and compliments
 
 **Authentication:**
 - `/src/lib/server/auth/config.ts` - Better Auth configuration (48 lines)
@@ -1045,6 +1206,10 @@ Pattern overlays: dots, stripes, stars, hearts, sparkles
 - `/src/lib/server/services/catalog-migration.ts` - Catalog migration on signup
 - `/src/lib/server/session.ts` - Anonymous session management
 - `/src/lib/data/doll-templates.ts` - Template metadata (184 lines)
+
+**Utilities:**
+- `/src/lib/utils/invite-codes.ts` - Invite code generation with collision retry
+- `/src/lib/utils/circle-permissions.ts` - Circle permission checks (owner/member)
 
 **Database:**
 - `/src/lib/server/db/schema.ts` - Drizzle schema (261 lines)
@@ -1075,6 +1240,8 @@ Pattern overlays: dots, stripes, stars, hearts, sparkles
 5. **Edit:** Click "Edit" from portfolio → `/editor` → use 6 tools → save updates
 6. **Paper Doll:** Click "Make Paper Doll" → `/doll-builder` → select template → place → generate PDF
 7. **Catalogs:** Create fashion collections linked to user account (persistent across sessions)
+8. **Circles:** Create/join circles → `/circles` → share designs → react with emojis → add compliments
+9. **Share:** From portfolio dropdown → "Share to Circle" → select circles → share to multiple at once
 
 ### Common Tasks
 
