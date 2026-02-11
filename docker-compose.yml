@@ -10,21 +10,28 @@ services:
       - "443:443"    # HTTPS
       - "80:80"      # HTTP (redirects to HTTPS)
     volumes:
-      - mysql-data:/var/lib/mysql
       - uploads-data:/app/static/uploads
       - pdfs-data:/app/static/pdfs
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=mysql://wrigs_user:wrigs_password@localhost:3306/wrigs_fashion
+      - DATABASE_URL=mysql://wrigs_user:password@wrigs-fashion-db-dev:3306/wrigs_fashion
       - PUBLIC_APP_URL=https://localhost
       - AUTH_SECRET=${AUTH_SECRET:-}
     restart: unless-stopped
+    networks:
+      - default
+      - wrigs-network
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "https://localhost:443/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+networks:
+  wrigs-network:
+    external: true
+    name: wrigs-fashion_wrigs-network
 
 volumes:
   mysql-data:
