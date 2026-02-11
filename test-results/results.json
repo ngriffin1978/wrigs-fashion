@@ -1,0 +1,215 @@
+{
+  "config": {
+    "configFile": "/root/projects/wrigs-fashion/playwright.config.ts",
+    "rootDir": "/root/projects/wrigs-fashion/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 600000,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/root/projects/wrigs-fashion/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/root/projects/wrigs-fashion/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/root/projects/wrigs-fashion/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/root/projects/wrigs-fashion/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/root/projects/wrigs-fashion/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/root/projects/wrigs-fashion/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/root/projects/wrigs-fashion/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "iPad",
+        "name": "iPad",
+        "testDir": "/root/projects/wrigs-fashion/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.2",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "05-authentication.spec.ts",
+      "file": "05-authentication.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Authentication",
+          "file": "05-authentication.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should register a new user",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3186,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/\\/(onboarding|portfolio|upload)/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:3000/auth/register\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/\\/(onboarding|portfolio|upload)/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:3000/auth/register\"\u001b[39m\n    at /root/projects/wrigs-fashion/tests/05-authentication.spec.ts:29:15",
+                        "location": {
+                          "file": "/root/projects/wrigs-fashion/tests/05-authentication.spec.ts",
+                          "column": 15,
+                          "line": 29
+                        },
+                        "snippet": "  27 | \t\t// Should redirect to onboarding or portfolio after successful registration\n  28 | \t\tconst url = page.url();\n> 29 | \t\texpect(url).toMatch(/\\/(onboarding|portfolio|upload)/);\n     | \t\t            ^\n  30 |\n  31 | \t\t// Verify user is logged in (check for logout button or user menu)\n  32 | \t\tconst logoutButton = page.getByRole('button', { name: /log out|sign out/i });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/root/projects/wrigs-fashion/tests/05-authentication.spec.ts",
+                            "column": 15,
+                            "line": 29
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/\\/(onboarding|portfolio|upload)/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:3000/auth/register\"\u001b[39m\n\n  27 | \t\t// Should redirect to onboarding or portfolio after successful registration\n  28 | \t\tconst url = page.url();\n> 29 | \t\texpect(url).toMatch(/\\/(onboarding|portfolio|upload)/);\n     | \t\t            ^\n  30 |\n  31 | \t\t// Verify user is logged in (check for logout button or user menu)\n  32 | \t\tconst logoutButton = page.getByRole('button', { name: /log out|sign out/i });\n    at /root/projects/wrigs-fashion/tests/05-authentication.spec.ts:29:15"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-11T17:05:51.009Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/root/projects/wrigs-fashion/test-results/05-authentication-Authentication-should-register-a-new-user-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/root/projects/wrigs-fashion/test-results/05-authentication-Authentication-should-register-a-new-user-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/root/projects/wrigs-fashion/test-results/05-authentication-Authentication-should-register-a-new-user-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/root/projects/wrigs-fashion/tests/05-authentication.spec.ts",
+                        "column": 15,
+                        "line": 29
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "3ed2539afcac00927ea5-ef565811b14e0eddf822",
+              "file": "05-authentication.spec.ts",
+              "line": 11,
+              "column": 2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-11T17:05:49.586Z",
+    "duration": 5025.302,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

@@ -7,8 +7,8 @@
 	let loading = $state(false);
 	let error = $state('');
 
-	// Get returnUrl from query params
-	const returnUrl = $page.url.searchParams.get('returnUrl') || '/portfolio';
+	// Get returnUrl from query params (derived to be reactive)
+	let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/portfolio');
 
 	async function handleSubmit() {
 		error = '';
@@ -68,7 +68,7 @@
 			</div>
 
 			<!-- Login Form -->
-			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} action="javascript:void(0)" method="post">
 				<!-- Email Field -->
 				<div class="form-control mb-4">
 					<label class="label" for="email">
