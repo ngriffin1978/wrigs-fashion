@@ -156,6 +156,7 @@ export const accounts = mysqlTable('accounts', {
 	accessToken: text('access_token'),
 	refreshToken: text('refresh_token'),
 	expiresAt: timestamp('expires_at'),
+	password: varchar('password', { length: 255 }), // Better Auth requires this for email/password auth
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 

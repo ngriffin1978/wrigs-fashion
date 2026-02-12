@@ -42,6 +42,9 @@
 			});
 			if (res.ok) {
 				const catalog = await res.json();
+
+				// Wait for browser to process cookies from response before navigating
+				await new Promise(resolve => setTimeout(resolve, 100));
 				window.location.href = `/catalogs/${catalog.id}`;
 			} else {
 				const data = await res.json();
