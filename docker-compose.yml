@@ -14,7 +14,7 @@ services:
       - pdfs-data:/app/static/pdfs
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=mysql://wrigs_user:password@wrigs-fashion-db-dev:3306/wrigs_fashion
+      - DATABASE_URL=mysql://wrigs_user:your_db_password_here@wrigs-fashion-db-dev:3306/wrigs_fashion
       - PUBLIC_APP_URL=https://localhost
       - AUTH_SECRET=${AUTH_SECRET:-}
     restart: unless-stopped
