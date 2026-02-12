@@ -129,7 +129,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.log('🎨 Starting image processing with Sharp...');
 
 		// Save original (converted to PNG)
+		// Auto-rotate based on EXIF orientation (fixes iOS rotation issues)
 		await sharp(processBuffer)
+			.rotate() // Automatically reads and applies EXIF orientation
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
 				withoutEnlargement: true
@@ -140,6 +142,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Process image: Remove background, enhance drawing colors, reduce color palette
 		// Step 1: Boost brightness aggressively to blow out the background
 		const processed = sharp(processBuffer)
+			.rotate() // Automatically reads and applies EXIF orientation (fixes iOS rotation)
 			.resize(MAX_DIMENSION, MAX_DIMENSION, {
 				fit: 'inside',
 				withoutEnlargement: true
