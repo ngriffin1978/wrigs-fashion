@@ -31,6 +31,13 @@
 		selectedId = null;
 	}
 
+	function handleCanvasClick(e: MouseEvent) {
+		// Only deselect if clicking directly on the canvas background
+		if (e.target === e.currentTarget) {
+			deselectAll();
+		}
+	}
+
 	function updateItem(id: string, updates: Partial<CatalogItemData>) {
 		const idx = items.findIndex((i) => i.id === id);
 		if (idx === -1) return;
@@ -62,7 +69,7 @@
 <div
 	class="catalog-canvas"
 	style="background-color: {backgroundColor};"
-	onclick={deselectAll}
+	onclick={handleCanvasClick}
 >
 	{#if items.length === 0 && !readonly}
 		<div class="empty-state">
