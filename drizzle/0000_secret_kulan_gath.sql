@@ -7,6 +7,7 @@ CREATE TABLE `accounts` (
 	`refresh_token` text,
 	`expires_at` timestamp,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
+	`password` varchar(255),
 	CONSTRAINT `accounts_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
@@ -135,10 +136,11 @@ CREATE TABLE `users` (
 	`email` varchar(255) NOT NULL,
 	`email_verified` boolean NOT NULL DEFAULT false,
 	`password` varchar(255),
-	`nickname` varchar(100) NOT NULL,
-	`avatar_url` varchar(500),
+	`name` varchar(100) NOT NULL,
+	`image` varchar(500),
 	`role` varchar(20) NOT NULL DEFAULT 'user',
 	`created_at` timestamp NOT NULL DEFAULT (now()),
+	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `users_id` PRIMARY KEY(`id`),
 	CONSTRAINT `users_email_unique` UNIQUE(`email`)
 );
