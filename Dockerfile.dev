@@ -1,7 +1,20 @@
 # Development Dockerfile with hot reload
-FROM node:20-alpine
+FROM node:20-bullseye-slim
 
 WORKDIR /app
+
+# Install build dependencies for native modules (canvas, sharp, etc.)
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    libcairo2-dev \
+    libjpeg-dev \
+    libpango1.0-dev \
+    libgif-dev \
+    libpixman-1-dev \
+    libvips-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 COPY package*.json ./
