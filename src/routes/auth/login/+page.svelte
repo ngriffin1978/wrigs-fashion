@@ -42,7 +42,7 @@
 			}
 
 			// Success! Redirect to returnUrl or portfolio
-			goto(returnUrl);
+			window.location.href = returnUrl;
 		} catch (err) {
 			error = 'Something went wrong! Check your connection 📡';
 			loading = false;
