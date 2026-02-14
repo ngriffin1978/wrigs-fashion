@@ -57,8 +57,10 @@
 		<ul class="menu menu-horizontal px-1">
 			<li><a href="/upload">Upload</a></li>
 			<li><a href="/catalogs">Catalogs</a></li>
+			{#if !data.user}
+				<li><a href="/portfolio">My Portfolio</a></li>
+			{/if}
 			{#if data.user}
-				<li><a href="/portfolio">Portfolio</a></li>
 				<li><a href="/circles">Circles</a></li>
 			{/if}
 		</ul>
