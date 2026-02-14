@@ -49,18 +49,27 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw error(401, "Hmm, that password doesn't match. Try again! 🔑");
 		}
 
-		// Set session cookie from Better Auth response
-		if (sessionCookie) {
-			// Better Auth sets the cookie with format: wrigs_session=token; ...
-			const cookieParts = sessionCookie.split(';')[0].split('=');
-			if (cookieParts.length === 2) {
-				cookies.set(cookieParts[0].trim(), cookieParts[1].trim(), {
-					path: '/',
-					httpOnly: true,
-					sameSite: 'lax',
-					secure: process.env.NODE_ENV === 'production',
-					maxAge: 60 * 60 * 24 * 30 // 30 days
-				});
+		// Set session cookies from Better Auth response
+		// Better Auth may set multiple cookies
+		const setCookies = signInResult.headers.get('set-cookie');
+		if (setCookies) {
+			// Parse all cookies from the header
+			const cookieStrings = setCookies.split(',').map((c: string) => c.trim());
+			
+			for (const cookieString of cookieStrings) {
+				const cookieParts = cookieString.split(';')[0].split('=');
+				if (cookieParts.length === 2) {
+					const cookieName = cookieParts[0].trim();
+					const cookieValue = decodeURIComponent(cookieParts[1].trim());
+					
+					cookies.set(cookieName, cookieValue, {
+						path: '/',
+						httpOnly: true,
+						sameSite: 'lax',
+						secure: process.env.NODE_ENV === 'production',
+						maxAge: 60 * 60 * 24 * 30 // 30 days
+					});
+				}
 			}
 		}
 
