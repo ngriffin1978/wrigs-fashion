@@ -142,6 +142,7 @@ export const sessions = mysqlTable('sessions', {
 	expiresAt: timestamp('expires_at').notNull(),
 	ipAddress: varchar('ip_address', { length: 45 }),
 	userAgent: text('user_agent'),
+	token: varchar('token', { length: 500 }),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
