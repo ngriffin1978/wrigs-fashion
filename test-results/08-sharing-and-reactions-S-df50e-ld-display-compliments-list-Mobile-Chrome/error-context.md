@@ -1,0 +1,80 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - link "✨ Wrigs Fashion" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e6]: ✨
+      - generic [ref=e7]: Wrigs Fashion
+    - generic [ref=e8]:
+      - link "Login 🔑" [ref=e9] [cursor=pointer]:
+        - /url: /auth/login
+      - link "Sign Up 🚀" [ref=e10] [cursor=pointer]:
+        - /url: /auth/register
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - heading "✨ Welcome Back! ✨" [level=1] [ref=e16]
+      - paragraph [ref=e17]: Login to continue creating! 🎨
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e21]: 📧 Email
+        - textbox "📧 Email" [ref=e22]:
+          - /placeholder: you@example.com
+      - generic [ref=e23]:
+        - generic [ref=e25]: 🔒 Password
+        - textbox "🔒 Password" [ref=e26]:
+          - /placeholder: Your password
+        - generic [ref=e28]: Forgot password? Contact support 💬
+      - button "Log In 🔑" [ref=e29] [cursor=pointer]
+    - generic [ref=e30]: Don't have an account?
+    - link "Create Account 🚀" [ref=e31] [cursor=pointer]:
+      - /url: /auth/register
+  - contentinfo [ref=e32]:
+    - generic [ref=e33]:
+      - paragraph [ref=e34]: ✨ Wrigs Fashion
+      - paragraph [ref=e35]: Draw. Digitize. Play! 🎨
+      - paragraph [ref=e36]: Made with love for creative kids
+  - button "Open color customizer" [active] [ref=e37] [cursor=pointer]:
+    - img [ref=e38]
+  - generic [ref=e40]:
+    - generic [ref=e41]:
+      - heading "🎨 Color Studio" [level=3] [ref=e42]
+      - button "✕" [ref=e43] [cursor=pointer]
+    - generic [ref=e44]:
+      - generic [ref=e45]:
+        - generic [ref=e47]: Primary (Pink)
+        - generic [ref=e48]:
+          - textbox [ref=e49] [cursor=pointer]: "#fff8b8"
+          - textbox "#E879F9" [ref=e50]: "#FFF8B8"
+      - generic [ref=e51]:
+        - generic [ref=e53]: Secondary (Purple)
+        - generic [ref=e54]:
+          - textbox [ref=e55] [cursor=pointer]: "#ffe9c5"
+          - textbox "#A78BFA" [ref=e56]: "#FFE9C5"
+      - generic [ref=e57]:
+        - generic [ref=e59]: Accent (Yellow)
+        - generic [ref=e60]:
+          - textbox [ref=e61] [cursor=pointer]: "#ffd4e5"
+          - textbox "#FDE047" [ref=e62]: "#FFD4E5"
+      - generic [ref=e63]:
+        - generic [ref=e65]: Success (Green)
+        - generic [ref=e66]:
+          - textbox [ref=e67] [cursor=pointer]: "#d0f0c0"
+          - textbox "#4ADE80" [ref=e68]: "#D0F0C0"
+    - generic [ref=e69]:
+      - generic [ref=e70]:
+        - heading "🎨 Pastel Showcase" [level=4] [ref=e71]
+        - generic [ref=e72]: 6 / 12
+      - generic [ref=e73]:
+        - button "← Previous" [ref=e74] [cursor=pointer]
+        - button "▶ Play" [ref=e75] [cursor=pointer]
+        - button "Next →" [ref=e76] [cursor=pointer]
+      - paragraph [ref=e78]: Lemon Meringue
+    - generic [ref=e79]:
+      - generic [ref=e81]: Cycle Speed
+      - slider [ref=e82] [cursor=pointer]: "4500"
+      - generic [ref=e83]: 4500ms (4.5s)
+    - heading "Preview" [level=4] [ref=e85]
+    - button "📋 Copy Config" [ref=e87] [cursor=pointer]
+```

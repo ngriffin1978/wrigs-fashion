@@ -1,0 +1,96 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - link "✨ Wrigs Fashion" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e6]: ✨
+      - generic [ref=e7]: Wrigs Fashion
+    - generic [ref=e8]:
+      - link "Login 🔑" [ref=e9] [cursor=pointer]:
+        - /url: /auth/login
+      - link "Sign Up 🚀" [ref=e10] [cursor=pointer]:
+        - /url: /auth/register
+  - generic [ref=e12]:
+    - generic [ref=e15]:
+      - heading "Draw. Digitize. Play!" [level=1] [ref=e16]
+      - paragraph [ref=e17]: Turn your fashion drawings into amazing paper dolls ✨
+      - link "Start Creating" [ref=e18] [cursor=pointer]:
+        - /url: /upload
+        - img [ref=e19]
+        - text: Start Creating
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - figure [ref=e23]:
+          - generic [ref=e24]: 📷
+        - generic [ref=e25]:
+          - heading "1. Upload" [level=2] [ref=e26]
+          - paragraph [ref=e27]: Take a photo of your fashion drawing
+      - generic [ref=e28]:
+        - figure [ref=e29]:
+          - generic [ref=e30]: 🎨
+        - generic [ref=e31]:
+          - heading "2. Color It" [level=2] [ref=e32]
+          - paragraph [ref=e33]: Add colors and fun patterns
+      - generic [ref=e34]:
+        - figure [ref=e35]:
+          - generic [ref=e36]: 👗
+        - generic [ref=e37]:
+          - heading "3. Paper Doll" [level=2] [ref=e38]
+          - paragraph [ref=e39]: Put it on a paper doll!
+      - generic [ref=e40]:
+        - figure [ref=e41]:
+          - generic [ref=e42]: 🖨️
+        - generic [ref=e43]:
+          - heading "4. Print & Play!" [level=2] [ref=e44]
+          - paragraph [ref=e45]: Cut, fold, and play!
+    - generic [ref=e47]:
+      - generic [ref=e48]: 👗
+      - generic [ref=e49]:
+        - heading "Paper Doll Maker" [level=2] [ref=e50]
+        - paragraph [ref=e51]: Turn your designs into printable paper dolls! Choose from 6 different body types and poses, then print and play!
+      - link "Browse Templates" [ref=e53] [cursor=pointer]:
+        - /url: /doll-builder
+    - generic [ref=e55]:
+      - generic [ref=e56]: 📚
+      - generic [ref=e57]:
+        - heading "Fashion Catalogs" [level=2] [ref=e58]
+        - paragraph [ref=e59]: Collect your designs on a canvas! Drag, resize, and arrange them however you like, then share with friends.
+      - link "My Catalogs" [ref=e61] [cursor=pointer]:
+        - /url: /catalogs
+    - generic [ref=e62]:
+      - heading "Your Recent Designs ✨" [level=2] [ref=e63]
+      - generic [ref=e64]:
+        - generic [ref=e65] [cursor=pointer]:
+          - figure [ref=e66]:
+            - generic [ref=e67]: 👗
+          - generic [ref=e68]:
+            - heading "Summer Dress" [level=3] [ref=e69]
+            - paragraph [ref=e70]: 2 days ago
+        - generic [ref=e71] [cursor=pointer]:
+          - figure [ref=e72]:
+            - generic [ref=e73]: 👔
+          - generic [ref=e74]:
+            - heading "Cool Jacket" [level=3] [ref=e75]
+            - paragraph [ref=e76]: 1 week ago
+        - generic [ref=e77] [cursor=pointer]:
+          - figure [ref=e78]:
+            - generic [ref=e79]: 👚
+          - generic [ref=e80]:
+            - heading "Sparkle Top" [level=3] [ref=e81]
+            - paragraph [ref=e82]: 2 weeks ago
+        - link "New Design" [ref=e83] [cursor=pointer]:
+          - /url: /upload
+          - figure [ref=e84]:
+            - button [ref=e85]:
+              - img [ref=e86]
+          - heading "New Design" [level=3] [ref=e89]
+  - contentinfo [ref=e90]:
+    - generic [ref=e91]:
+      - paragraph [ref=e92]: ✨ Wrigs Fashion
+      - paragraph [ref=e93]: Draw. Digitize. Play! 🎨
+      - paragraph [ref=e94]: Made with love for creative kids
+  - button "Open color customizer" [ref=e95] [cursor=pointer]:
+    - img [ref=e96]
+```

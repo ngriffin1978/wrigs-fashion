@@ -70,16 +70,26 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		const signInData = await signInResult.json();
-		if (!signInData.user || !signInData.session) {
+		if (!signInData.user) {
+			console.error('Better Auth signin succeeded but no user');
+			throw error(500, 'Account created but login failed. Please try logging in! 🔑');
+		}
+
+		// Check for session in response OR cookie header
+		let sessionCookie = signInResult.headers.get('set-cookie');
+		const hasSession = signInData.session || sessionCookie;
+		
+		if (!hasSession) {
 			console.error('Better Auth signin succeeded but no session');
+			console.log('signInData:', JSON.stringify(signInData));
+			console.log('sessionCookie:', sessionCookie);
 			throw error(500, 'Account created but login failed. Please try logging in! 🔑');
 		}
 
 		// Set session cookie from Better Auth response
-		const setCookieHeader = signInResult.headers.get('set-cookie');
-		if (setCookieHeader) {
+		if (sessionCookie) {
 			// Better Auth sets the cookie with format: wrigs_session=token; ...
-			const cookieParts = setCookieHeader.split(';')[0].split('=');
+			const cookieParts = sessionCookie.split(';')[0].split('=');
 			if (cookieParts.length === 2) {
 				cookies.set(cookieParts[0].trim(), cookieParts[1].trim(), {
 					path: '/',

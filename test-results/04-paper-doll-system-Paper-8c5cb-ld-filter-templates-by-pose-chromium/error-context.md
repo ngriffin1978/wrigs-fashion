@@ -1,0 +1,137 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - link "✨ Wrigs Fashion" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e6]: ✨
+      - generic [ref=e7]: Wrigs Fashion
+    - list [ref=e9]:
+      - listitem [ref=e10]:
+        - link "Upload" [ref=e11] [cursor=pointer]:
+          - /url: /upload
+      - listitem [ref=e12]:
+        - link "Catalogs" [ref=e13] [cursor=pointer]:
+          - /url: /catalogs
+    - generic [ref=e14]:
+      - link "Login 🔑" [ref=e15] [cursor=pointer]:
+        - /url: /auth/login
+      - link "Sign Up 🚀" [ref=e16] [cursor=pointer]:
+        - /url: /auth/register
+  - generic [ref=e18]:
+    - generic [ref=e19]:
+      - heading "Choose Your Paper Doll" [level=1] [ref=e20]
+      - paragraph [ref=e21]: Pick a pose and body type that matches your style!
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e26]: "Choose a Pose:"
+        - radiogroup "Pose filter" [ref=e27]:
+          - generic [ref=e28] [cursor=pointer]:
+            - radio "All Poses" [checked] [ref=e29]
+            - generic [ref=e30]:
+              - generic [ref=e31]: All Poses
+              - generic [ref=e32]: See everything!
+          - generic [ref=e33] [cursor=pointer]:
+            - radio "Pose A - Classic Pose (Arms Out)" [ref=e34]
+            - generic [ref=e35]:
+              - generic [ref=e36]: Pose A - Classic (Arms Out)
+              - generic [ref=e37]: Classic paper doll pose with arms out - perfect for jackets and accessories
+          - generic [ref=e38] [cursor=pointer]:
+            - radio "Pose B - Standing Pose (Arms Down)" [ref=e39]
+            - generic [ref=e40]:
+              - generic [ref=e41]: Pose B - Standing (Arms Down)
+              - generic [ref=e42]: Standing pose with arms down - great for dresses and flowing designs
+      - generic [ref=e43]:
+        - generic [ref=e45]: "Choose a Body Type:"
+        - radiogroup "Body type filter" [ref=e46]:
+          - generic [ref=e47] [cursor=pointer]:
+            - radio "All Body Types" [checked] [ref=e48]
+            - generic [ref=e49]:
+              - generic [ref=e50]: All Body Types
+              - generic [ref=e51]: Every body is beautiful!
+          - generic [ref=e52] [cursor=pointer]:
+            - radio "Classic Build" [ref=e53]
+            - generic [ref=e54]:
+              - generic [ref=e55]: Classic Build
+              - generic [ref=e56]: Classic proportions, perfect for all designs
+          - generic [ref=e57] [cursor=pointer]:
+            - radio "Curvy Build" [ref=e58]
+            - generic [ref=e59]:
+              - generic [ref=e60]: Curvy Build
+              - generic [ref=e61]: Fuller figure, celebrates beautiful curves
+          - generic [ref=e62] [cursor=pointer]:
+            - radio "Petite Build" [ref=e63]
+            - generic [ref=e64]:
+              - generic [ref=e65]: Petite Build
+              - generic [ref=e66]: Smaller frame, great for delicate designs
+    - generic [ref=e67]:
+      - heading "6 Templates Available" [level=2] [ref=e68]
+      - generic [ref=e69]:
+        - button "Classic Pose Arms out to the sides Classic Build Click to choose this doll →" [ref=e70] [cursor=pointer]:
+          - figure [ref=e71]:
+            - img "Classic Pose" [ref=e72]
+          - generic [ref=e73]:
+            - heading "Classic Pose" [level=3] [ref=e74]
+            - generic [ref=e75]:
+              - generic [ref=e76]: Arms out to the sides
+              - generic [ref=e77]: Classic Build
+            - generic [ref=e78]: Click to choose this doll →
+        - button "Classic Pose Arms out to the sides Curvy Build Click to choose this doll →" [ref=e79] [cursor=pointer]:
+          - figure [ref=e80]:
+            - img "Classic Pose" [ref=e81]
+          - generic [ref=e82]:
+            - heading "Classic Pose" [level=3] [ref=e83]
+            - generic [ref=e84]:
+              - generic [ref=e85]: Arms out to the sides
+              - generic [ref=e86]: Curvy Build
+            - generic [ref=e87]: Click to choose this doll →
+        - button "Classic Pose Arms out to the sides Petite Build Click to choose this doll →" [ref=e88] [cursor=pointer]:
+          - figure [ref=e89]:
+            - img "Classic Pose" [ref=e90]
+          - generic [ref=e91]:
+            - heading "Classic Pose" [level=3] [ref=e92]
+            - generic [ref=e93]:
+              - generic [ref=e94]: Arms out to the sides
+              - generic [ref=e95]: Petite Build
+            - generic [ref=e96]: Click to choose this doll →
+        - button "Standing Pose Arms down at sides Classic Build Click to choose this doll →" [ref=e97] [cursor=pointer]:
+          - figure [ref=e98]:
+            - img "Standing Pose" [ref=e99]
+          - generic [ref=e100]:
+            - heading "Standing Pose" [level=3] [ref=e101]
+            - generic [ref=e102]:
+              - generic [ref=e103]: Arms down at sides
+              - generic [ref=e104]: Classic Build
+            - generic [ref=e105]: Click to choose this doll →
+        - button "Standing Pose Arms down at sides Curvy Build Click to choose this doll →" [ref=e106] [cursor=pointer]:
+          - figure [ref=e107]:
+            - img "Standing Pose" [ref=e108]
+          - generic [ref=e109]:
+            - heading "Standing Pose" [level=3] [ref=e110]
+            - generic [ref=e111]:
+              - generic [ref=e112]: Arms down at sides
+              - generic [ref=e113]: Curvy Build
+            - generic [ref=e114]: Click to choose this doll →
+        - button "Standing Pose Arms down at sides Petite Build Click to choose this doll →" [ref=e115] [cursor=pointer]:
+          - figure [ref=e116]:
+            - img "Standing Pose" [ref=e117]
+          - generic [ref=e118]:
+            - heading "Standing Pose" [level=3] [ref=e119]
+            - generic [ref=e120]:
+              - generic [ref=e121]: Arms down at sides
+              - generic [ref=e122]: Petite Build
+            - generic [ref=e123]: Click to choose this doll →
+    - generic [ref=e124]:
+      - img [ref=e125]
+      - generic [ref=e127]:
+        - heading "All Bodies Are Beautiful!" [level=3] [ref=e128]
+        - generic [ref=e129]: Pick the doll that feels right for your design. There's no wrong choice - every body type is perfect for fashion!
+  - contentinfo [ref=e130]:
+    - generic [ref=e131]:
+      - paragraph [ref=e132]: ✨ Wrigs Fashion
+      - paragraph [ref=e133]: Draw. Digitize. Play! 🎨
+      - paragraph [ref=e134]: Made with love for creative kids
+  - button "Open color customizer" [ref=e135] [cursor=pointer]:
+    - img [ref=e136]
+```

@@ -1,0 +1,50 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - link "✨ Wrigs Fashion" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e6]: ✨
+      - generic [ref=e7]: Wrigs Fashion
+    - list [ref=e9]:
+      - listitem [ref=e10]:
+        - link "Upload" [ref=e11] [cursor=pointer]:
+          - /url: /upload
+      - listitem [ref=e12]:
+        - link "Catalogs" [ref=e13] [cursor=pointer]:
+          - /url: /catalogs
+    - generic [ref=e14]:
+      - link "Login 🔑" [ref=e15] [cursor=pointer]:
+        - /url: /auth/login
+      - link "Sign Up 🚀" [ref=e16] [cursor=pointer]:
+        - /url: /auth/register
+  - generic [ref=e20]:
+    - generic [ref=e21]:
+      - heading "✨ Welcome Back! ✨" [level=1] [ref=e22]
+      - paragraph [ref=e23]: Login to continue creating! 🎨
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e27]: 📧 Email
+        - textbox "📧 Email" [ref=e28]:
+          - /placeholder: you@example.com
+          - text: test-1770926677131@example.com
+      - generic [ref=e29]:
+        - generic [ref=e31]: 🔒 Password
+        - textbox "🔒 Password" [ref=e32]:
+          - /placeholder: Your password
+          - text: TestPassword123!
+        - generic [ref=e34]: Forgot password? Contact support 💬
+      - generic [ref=e36]: Something went wrong! Please try again 😅
+      - button "Log In 🔑" [ref=e37] [cursor=pointer]
+    - generic [ref=e38]: Don't have an account?
+    - link "Create Account 🚀" [ref=e39] [cursor=pointer]:
+      - /url: /auth/register
+  - contentinfo [ref=e40]:
+    - generic [ref=e41]:
+      - paragraph [ref=e42]: ✨ Wrigs Fashion
+      - paragraph [ref=e43]: Draw. Digitize. Play! 🎨
+      - paragraph [ref=e44]: Made with love for creative kids
+  - button "Open color customizer" [ref=e45] [cursor=pointer]:
+    - img [ref=e46]
+```
