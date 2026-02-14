@@ -97,11 +97,11 @@
 			</div>
 		{:else}
 			<!-- Not Authenticated -->
-			<a href="/auth/login" class="btn btn-ghost">
-				Login 🔑
+			<a href="/auth/login" class="btn btn-ghost btn-sm text-gray-700">
+				Login
 			</a>
-			<a href="/auth/register" class="btn btn-primary">
-				Sign Up 🚀
+			<a href="/auth/register" class="btn btn-secondary shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+				Sign Up
 			</a>
 		{/if}
 	</div>
