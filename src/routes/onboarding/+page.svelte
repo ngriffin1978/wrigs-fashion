@@ -9,7 +9,7 @@
 			countdown--;
 			if (countdown === 0) {
 				clearInterval(interval);
-				goto('/portfolio');
+				goto('/catalogs');
 			}
 		}, 1000);
 
@@ -31,12 +31,12 @@
 				Your account is all set! Let's create something amazing! ✨
 			</p>
 			<div class="text-6xl mb-6">🎨 👗 ✂️</div>
-			<p class="text-lg text-gray-600 mb-8">
-				Redirecting to your portfolio in {countdown}...
-			</p>
-			<button class="btn btn-primary btn-lg" onclick={() => goto('/portfolio')}>
-				Go to Portfolio Now! 🚀
-			</button>
+		<p class="text-lg text-gray-600 mb-8">
+			Redirecting to your catalogs in {countdown}...
+		</p>
+		<button class="btn btn-primary btn-lg" onclick={() => goto('/catalogs')}>
+			Go to Catalogs Now! 🚀
+		</button>
 		</div>
 	</div>
 </div>

@@ -206,7 +206,7 @@
 		<EmptyState
 			icon="🎨"
 			title="No designs shared yet"
-			description="Be the first to share a design with this circle! Share from your portfolio or after creating a paper doll."
+			description="Be the first to share a design with this circle! Share from your catalogs or after creating a paper doll."
 		/>
 	{:else}
 		<div class="grid grid-cols-1 gap-6">

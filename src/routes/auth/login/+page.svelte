@@ -8,7 +8,7 @@
 	let error = $state('');
 
 	// Get returnUrl from query params (derived to be reactive)
-	let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/portfolio');
+	let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/catalogs');
 
 	async function handleSubmit() {
 		error = '';

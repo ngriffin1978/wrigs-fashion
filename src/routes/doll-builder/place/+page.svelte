@@ -204,8 +204,8 @@
 		}
 	}
 
-	function goToPortfolio() {
-		window.location.href = '/portfolio';
+	function goToCatalogs() {
+		window.location.href = '/catalogs';
 	}
 </script>
 

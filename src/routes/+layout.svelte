@@ -56,10 +56,7 @@
 	<div class="navbar-center hidden lg:flex">
 		<ul class="menu menu-horizontal px-1">
 			<li><a href="/upload">Upload</a></li>
-			<li><a href="/catalogs">Catalogs</a></li>
-			{#if !data.user}
-				<li><a href="/portfolio">My Portfolio</a></li>
-			{/if}
+			<li><a href="/catalogs">My Catalogs</a></li>
 			{#if data.user}
 				<li><a href="/circles">Circles</a></li>
 			{/if}
@@ -88,7 +85,6 @@
 					tabindex="0"
 					class="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-white rounded-box w-52"
 				>
-					<li><a href="/portfolio">My Portfolio</a></li>
 					<li><a href="/catalogs">My Catalogs</a></li>
 					<li><a href="/circles">My Circles</a></li>
 					<li><a href="/settings">Settings</a></li>

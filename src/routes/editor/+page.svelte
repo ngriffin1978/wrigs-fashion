@@ -373,11 +373,11 @@
 			});
 
 			if (saveRes.ok) {
-				alert('🎉 Design saved to your portfolio!');
-				// Optionally redirect to portfolio
-				const shouldGoToPortfolio = confirm('Go to your portfolio now?');
-				if (shouldGoToPortfolio) {
-					goto('/portfolio');
+				alert('🎉 Design saved to your catalogs!');
+				// Optionally redirect to catalogs
+				const shouldGoToCatalogs = confirm('Go to your catalogs now?');
+				if (shouldGoToCatalogs) {
+					goto('/catalogs');
 				}
 			} else {
 				alert('Failed to save design! 😅');
@@ -496,7 +496,7 @@
 				</svg>
 				<div>
 					<h3 class="font-bold">Want to save your designs? 🎨</h3>
-					<p class="text-sm">Sign up for free to save to your portfolio and access all features!</p>
+					<p class="text-sm">Sign up for free to save to your catalogs and access all features!</p>
 				</div>
 				<div class="flex-none">
 					<a href="/auth/register" class="btn btn-sm btn-primary">Sign Up Free 🚀</a>
