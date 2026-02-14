@@ -25,13 +25,13 @@
 			});
 
 			if (response.ok) {
-				// Redirect to homepage after logout
-				goto('/');
+				// Use window.location to do a full page reload to clear cookies properly
+				window.location.href = '/';
 			}
 		} catch (error) {
 			console.error('Logout error:', error);
 			// Still redirect even if there's an error
-			goto('/');
+			window.location.href = '/';
 		}
 	}
 
