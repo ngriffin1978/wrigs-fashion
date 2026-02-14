@@ -143,6 +143,7 @@ export const sessions = mysqlTable('sessions', {
 	ipAddress: varchar('ip_address', { length: 45 }),
 	userAgent: text('user_agent'),
 	token: varchar('token', { length: 500 }),
+	updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
