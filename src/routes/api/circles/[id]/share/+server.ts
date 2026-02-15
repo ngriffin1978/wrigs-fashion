@@ -2,7 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { requireAuth } from '$lib/server/auth/guards';
 import { getDb } from '$lib/server/db';
-import { sharedItems, designs, dollProjects } from '$lib/server/db/schema';
+import { sharedItems, designs, dollProjects, catalogs } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { requireCircleMembership } from '$lib/utils/circle-permissions';
@@ -10,7 +10,7 @@ import { requireCircleMembership } from '$lib/utils/circle-permissions';
 /**
  * POST /api/circles/[id]/share
  * Share an item to a specific circle
- * Body: { itemType: 'design' | 'dollProject', itemId: string }
+ * Body: { itemType: 'design' | 'dollProject' | 'catalog', itemId: string }
  */
 export const POST: RequestHandler = async ({ params, request, locals }) => {
 	const user = requireAuth(locals);
@@ -25,8 +25,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		const { itemType, itemId } = body;
 
 		// Validate input
-		if (!itemType || (itemType !== 'design' && itemType !== 'dollProject')) {
-			throw error(400, 'Invalid item type. Must be "design" or "dollProject"');
+		if (!itemType || !['design', 'dollProject', 'catalog'].includes(itemType)) {
+			throw error(400, 'Invalid item type. Must be "design", "dollProject", or "catalog"');
 		}
 
 		if (!itemId || typeof itemId !== 'string') {
@@ -42,14 +42,21 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			if (!design) {
 				throw error(404, 'Design not found or you do not have permission to share it');
 			}
-		} else {
-			// dollProject
+		} else if (itemType === 'dollProject') {
 			const dollProject = await db.query.dollProjects.findFirst({
 				where: and(eq(dollProjects.id, itemId), eq(dollProjects.userId, user.id))
 			});
 
 			if (!dollProject) {
 				throw error(404, 'Paper doll not found or you do not have permission to share it');
+			}
+		} else if (itemType === 'catalog') {
+			const catalog = await db.query.catalogs.findFirst({
+				where: and(eq(catalogs.id, itemId), eq(catalogs.userId, user.id))
+			});
+
+			if (!catalog) {
+				throw error(404, 'Catalog not found or you do not have permission to share it');
 			}
 		}
 

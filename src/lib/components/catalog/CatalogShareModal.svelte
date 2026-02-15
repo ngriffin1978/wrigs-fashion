@@ -18,10 +18,35 @@
 	let toggling = $state(false);
 	let copied = $state(false);
 	let error = $state('');
+	let circles = $state<{id: string, name: string}[]>([]);
+	let circlesLoading = $state(false);
+	let selectedCircle = $state('');
+	let sharing = $state(false);
+	let shareSuccess = $state('');
 
 	let shareUrl = $derived(
 		shareSlug ? `${typeof window !== 'undefined' ? window.location.origin : ''}/catalogs/share/${shareSlug}` : ''
 	);
+
+	$effect(() => {
+		if (open && !circles.length) {
+			loadCircles();
+		}
+	});
+
+	async function loadCircles() {
+		circlesLoading = true;
+		try {
+			const res = await fetch('/api/circles');
+			if (res.ok) {
+				const data = await res.json();
+				circles = data.circles || [];
+			}
+		} catch (e) {
+			console.error('Failed to load circles');
+		}
+		circlesLoading = false;
+	}
 
 	async function togglePublic() {
 		toggling = true;
@@ -55,6 +80,33 @@
 			// Fallback: select text
 		}
 	}
+
+	async function shareToCircle() {
+		if (!selectedCircle) return;
+		sharing = true;
+		error = '';
+		shareSuccess = '';
+		try {
+			const res = await fetch(`/api/circles/${selectedCircle}/share`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ 
+					itemType: 'catalog', 
+					itemId: catalogId 
+				})
+			});
+			if (!res.ok) {
+				const data = await res.json();
+				error = data.message || 'Failed to share to circle';
+				return;
+			}
+			shareSuccess = 'Shared to circle! ✨';
+			setTimeout(() => { shareSuccess = ''; }, 3000);
+		} catch {
+			error = 'Failed to share to circle';
+		}
+		sharing = false;
+	}
 </script>
 
 {#if open}
@@ -75,6 +127,10 @@
 
 			{#if error}
 				<div class="alert alert-error text-sm mb-3">{error}</div>
+			{/if}
+
+			{#if shareSuccess}
+				<div class="alert alert-success text-sm mb-3">{shareSuccess}</div>
 			{/if}
 
 			<div class="toggle-row">
@@ -110,7 +166,42 @@
 
 			<div class="circles-section">
 				<p class="section-label">Share to Circles</p>
-				<p class="coming-soon">Circle sharing coming soon!</p>
+				
+				{#if circlesLoading}
+					<div class="text-center py-4">
+						<span class="loading loading-spinner loading-sm"></span>
+					</div>
+				{:else if circles.length === 0}
+					<p class="text-sm text-gray-500 text-center py-4">
+						You don't have any circles yet.<br/>
+						<a href="/circles" class="link link-primary">Create a circle</a> to share with friends!
+					</p>
+				{:else}
+					<div class="space-y-3">
+						<select 
+							class="select select-bordered w-full"
+							bind:value={selectedCircle}
+						>
+							<option value="">Select a circle...</option>
+							{#each circles as circle}
+								<option value={circle.id}>{circle.name}</option>
+							{/each}
+						</select>
+						
+						<button 
+							class="btn btn-primary w-full"
+							disabled={!selectedCircle || sharing}
+							onclick={shareToCircle}
+						>
+							{#if sharing}
+								<span class="loading loading-spinner loading-sm"></span>
+								Sharing...
+							{:else}
+								Share to Circle 🎉
+							{/if}
+						</button>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

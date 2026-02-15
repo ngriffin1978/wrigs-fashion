@@ -103,7 +103,7 @@
 					/>
 					<!-- Forgot Password (V2 Feature) -->
 					<label class="label">
-						<span class="label-text-alt text-gray-500">Forgot password? Contact support 💬</span>
+						<span class="label-text-alt text-gray-500">Forgot password? Ask a grown-up for help 👨‍👩‍👧</span>
 					</label>
 				</div>
 

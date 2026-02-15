@@ -90,7 +90,8 @@
 	<div class="navbar-center hidden lg:flex">
 		<ul class="menu menu-horizontal px-1">
 			<li><a href="/upload" class="min-h-11">Upload</a></li>
-			<li><a href="/catalogs" class="min-h-11">My Catalogs</a></li>
+			<li><a href="/catalogs" class="min-h-11">My Designs</a></li>
+			<li><a href="/doll-builder" class="min-h-11">Paper Dolls</a></li>
 			{#if data.user}
 				<li><a href="/circles" class="min-h-11">Circles</a></li>
 			{/if}

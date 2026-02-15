@@ -112,10 +112,12 @@
 						class:input-error={errors.email}
 						placeholder="you@example.com"
 						disabled={loading}
+						autocomplete="email"
+						aria-required="true"
 					/>
 					{#if errors.email}
 						<label class="label">
-							<span class="label-text-alt text-error">{errors.email}</span>
+							<span class="label-text-alt text-error" id="email-error">{errors.email}</span>
 						</label>
 					{/if}
 				</div>
@@ -134,10 +136,12 @@
 						class:input-error={errors.password}
 						placeholder="At least 8 characters"
 						disabled={loading}
+						autocomplete="new-password"
+						aria-required="true"
 					/>
 					{#if errors.password}
 						<label class="label">
-							<span class="label-text-alt text-error">{errors.password}</span>
+							<span class="label-text-alt text-error" id="password-error">{errors.password}</span>
 						</label>
 					{/if}
 
@@ -168,10 +172,37 @@
 						class:input-error={errors.confirmPassword}
 						placeholder="Type your password again"
 						disabled={loading}
+						autocomplete="new-password"
+						aria-required="true"
 					/>
 					{#if errors.confirmPassword}
 						<label class="label">
-							<span class="label-text-alt text-error">{errors.confirmPassword}</span>
+							<span class="label-text-alt text-error" id="confirm-error">{errors.confirmPassword}</span>
+						</label>
+					{/if}
+				</div>
+
+				<!-- Nickname Field -->
+				<div class="form-control mb-6">
+					<label class="label" for="nickname">
+						<span class="label-text font-semibold">🎨 Nickname</span>
+					</label>
+					<input
+						type="text"
+						id="nickname"
+						name="nickname"
+						bind:value={nickname}
+						class="input input-bordered w-full"
+						class:input-error={errors.nickname}
+						placeholder="What should we call you?"
+						disabled={loading}
+						maxlength="20"
+						autocomplete="nickname"
+						aria-required="true"
+					/>
+					{#if errors.nickname}
+						<label class="label">
+							<span class="label-text-alt text-error" id="nickname-error">{errors.nickname}</span>
 						</label>
 					{/if}
 				</div>
