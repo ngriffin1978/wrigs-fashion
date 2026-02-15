@@ -26,6 +26,10 @@
 
 	// Get the appropriate image to display
 	let imageUrl = $derived.by(() => {
+		if (item.catalog) {
+			// For catalogs, we don't have a single image - show placeholder
+			return null;
+		}
 		if (item.design) {
 			return item.design.cleanedImageUrl || item.design.originalImageUrl;
 		}
@@ -36,12 +40,19 @@
 	});
 
 	let title = $derived.by(() => {
+		if (item.catalog) return item.catalog.title || 'Untitled Catalog';
 		if (item.design) return item.design.title;
 		if (item.dollProject) return `Paper Doll - ${item.dollProject.design?.title || 'Untitled'}`;
 		return 'Untitled';
 	});
 
-	let isPdf = $derived(item.itemType === 'dollProject');
+	let itemTypeLabel = $derived.by(() => {
+		if (item.itemType === 'catalog') return 'Catalog';
+		if (item.itemType === 'dollProject') return 'Paper Doll';
+		return 'Design';
+	});
+
+	let showPdf = $derived(item.itemType === 'dollProject' && item.dollProject?.pdfUrl);
 </script>
 
 <div class="card bg-white shadow-xl">
@@ -56,9 +67,7 @@
 			<div>
 				<p class="font-semibold">{item.sharedByUser?.name || 'Unknown'}</p>
 				<p class="text-xs text-gray-500">
-					shared {item.itemType === 'design' ? 'a design' : 'a paper doll'} • {formatDate(
-						item.createdAt
-					)}
+					shared a {itemTypeLabel.toLowerCase()} • {formatDate(item.createdAt)}
 				</p>
 			</div>
 		</div>
@@ -70,7 +79,7 @@
 				{#if imageUrl}
 					<img src={imageUrl} alt={title} class="w-full h-full object-contain" />
 				{:else}
-					<span class="text-6xl">{isPdf ? '📄' : '🎨'}</span>
+					<span class="text-6xl">📚</span>
 				{/if}
 			</div>
 
@@ -78,13 +87,9 @@
 			<div>
 				<h3 class="font-bold text-xl mb-2">{title}</h3>
 
-				{#if isPdf}
-					<div class="badge badge-secondary mb-2">Paper Doll</div>
-				{:else}
-					<div class="badge badge-primary mb-2">Design</div>
-				{/if}
+				<div class="badge badge-primary mb-2">{itemTypeLabel}</div>
 
-				{#if item.dollProject?.pdfUrl}
+				{#if showPdf}
 					<a
 						href={item.dollProject.pdfUrl}
 						download
@@ -106,6 +111,14 @@
 							/>
 						</svg>
 						Download PDF
+					</a>
+				{:else if item.itemType === 'catalog'}
+					<a
+						href="/catalogs/{item.catalog?.id}"
+						class="btn btn-sm btn-outline mt-2"
+						target="_blank"
+					>
+						View Catalog 📚
 					</a>
 				{/if}
 

@@ -48,11 +48,6 @@
 	Skip to main content
 </a>
 
-<!-- Under Construction Banner -->
-<div class="bg-gradient-to-r from-yellow-200 via-orange-200 to-pink-200 text-center py-2 px-4 text-sm font-semibold animate-pulse">
-	🚧 We're making improvements! Some things may look different. Thanks for your patience! 🚧
-</div>
-
 <!-- Navigation -->
 <nav class="navbar bg-white shadow-lg mb-4 lg:mb-8">
 	<div class="navbar-start">
@@ -122,7 +117,6 @@
 				>
 					<li><a href="/catalogs">My Catalogs</a></li>
 					<li><a href="/circles">My Circles</a></li>
-					<li><a href="/settings">Settings</a></li>
 					<li><button onclick={handleLogout} data-testid="logout-button">Log Out 👋</button></li>
 				</ul>
 			</div>
@@ -146,6 +140,7 @@
 			{#if data.user}
 				<li><a href="/circles" onclick={closeMobileMenu} class="btn btn-ghost justify-start min-h-12">👥 Circles</a></li>
 				<li><a href="/circles/join" onclick={closeMobileMenu} class="btn btn-ghost justify-start min-h-12">➕ Join Circle</a></li>
+				<li><button onclick={() => { closeMobileMenu(); handleLogout(); }} class="btn btn-ghost justify-start min-h-12 text-error">🚪 Log Out</button></li>
 			{:else}
 				<li><a href="/auth/login" onclick={closeMobileMenu} class="btn btn-ghost justify-start min-h-12">🔑 Login</a></li>
 				<li><a href="/auth/register" onclick={closeMobileMenu} class="btn btn-secondary justify-start min-h-12">✨ Sign Up</a></li>

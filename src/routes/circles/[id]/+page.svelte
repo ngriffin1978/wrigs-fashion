@@ -200,13 +200,13 @@
 	</div>
 
 	<!-- Shared Items Feed -->
-	<h3 class="text-2xl font-bold text-gray-800 mb-4">Shared Designs 🎨</h3>
+	<h3 class="text-2xl font-bold text-gray-800 mb-4">Shared Catalogs 📚</h3>
 
 	{#if data.items.length === 0}
 		<EmptyState
-			icon="🎨"
-			title="No designs shared yet"
-			description="Be the first to share a design with this circle! Share from your catalogs or after creating a paper doll."
+			icon="📚"
+			title="No catalogs shared yet"
+			description="Be the first to share a catalog with this circle! Go to your catalogs and click Share."
 		/>
 	{:else}
 		<div class="grid grid-cols-1 gap-6">

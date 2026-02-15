@@ -24,6 +24,7 @@
 		"@sveltejs/adapter-node": "^5.0.1",
 		"@sveltejs/kit": "^2.5.0",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
+		"@types/bcrypt": "^6.0.0",
 		"@types/node": "^25.2.0",
 		"autoprefixer": "^10.4.16",
 		"daisyui": "^4.6.0",
@@ -37,6 +38,7 @@
 	},
 	"dependencies": {
 		"@types/pdfkit": "^0.17.4",
+		"bcrypt": "^6.0.0",
 		"better-auth": "^1.4.18",
 		"canvas": "^3.2.1",
 		"drizzle-orm": "^0.45.1",

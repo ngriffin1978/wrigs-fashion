@@ -19,23 +19,24 @@
 	let copied = $state(false);
 	let error = $state('');
 	let circles = $state<{id: string, name: string}[]>([]);
-	let circlesLoading = $state(false);
+	let circlesLoading = $state(true);
 	let selectedCircle = $state('');
 	let sharing = $state(false);
 	let shareSuccess = $state('');
+	let newCircleName = $state('');
+	let creatingCircle = $state(false);
 
 	let shareUrl = $derived(
 		shareSlug ? `${typeof window !== 'undefined' ? window.location.origin : ''}/catalogs/share/${shareSlug}` : ''
 	);
 
 	$effect(() => {
-		if (open && !circles.length) {
+		if (open && circlesLoading) {
 			loadCircles();
 		}
 	});
 
 	async function loadCircles() {
-		circlesLoading = true;
 		try {
 			const res = await fetch('/api/circles');
 			if (res.ok) {
@@ -46,6 +47,34 @@
 			console.error('Failed to load circles');
 		}
 		circlesLoading = false;
+	}
+
+	async function createCircle() {
+		if (!newCircleName.trim()) return;
+		creatingCircle = true;
+		error = '';
+		try {
+			const res = await fetch('/api/circles', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name: newCircleName.trim() })
+			});
+			if (!res.ok) {
+				const data = await res.json();
+				error = data.message || 'Failed to create circle';
+				return;
+			}
+			const data = await res.json();
+			// Add new circle to list
+			circles = [...circles, data.circle];
+			// Auto-share to the newly created circle
+			selectedCircle = data.circle.id;
+			await shareToCircle();
+			newCircleName = '';
+		} catch (e) {
+			error = 'Failed to create circle';
+		}
+		creatingCircle = false;
 	}
 
 	async function togglePublic() {
@@ -171,33 +200,54 @@
 					<div class="text-center py-4">
 						<span class="loading loading-spinner loading-sm"></span>
 					</div>
-				{:else if circles.length === 0}
-					<p class="text-sm text-gray-500 text-center py-4">
-						You don't have any circles yet.<br/>
-						<a href="/circles" class="link link-primary">Create a circle</a> to share with friends!
-					</p>
 				{:else}
 					<div class="space-y-3">
-						<select 
-							class="select select-bordered w-full"
-							bind:value={selectedCircle}
-						>
-							<option value="">Select a circle...</option>
-							{#each circles as circle}
-								<option value={circle.id}>{circle.name}</option>
-							{/each}
-						</select>
+						{#if circles.length > 0}
+							<select 
+								class="select select-bordered w-full"
+								bind:value={selectedCircle}
+							>
+								<option value="">Select a circle...</option>
+								{#each circles as circle}
+									<option value={circle.id}>{circle.name}</option>
+								{/each}
+							</select>
+							
+							<button 
+								class="btn btn-primary w-full"
+								disabled={!selectedCircle || sharing}
+								onclick={shareToCircle}
+							>
+								{#if sharing}
+									<span class="loading loading-spinner loading-sm"></span>
+									Sharing...
+								{:else}
+									Share to Circle 🎉
+								{/if}
+							</button>
+							
+							<div class="divider text-xs">OR</div>
+						{/if}
 						
+						<p class="text-sm text-gray-500">
+							Create a new circle to share with friends!
+						</p>
+						<input
+							type="text"
+							class="input input-bordered w-full"
+							placeholder="My Circle Name"
+							bind:value={newCircleName}
+						/>
 						<button 
-							class="btn btn-primary w-full"
-							disabled={!selectedCircle || sharing}
-							onclick={shareToCircle}
+							class="btn btn-secondary w-full"
+							disabled={!newCircleName.trim() || creatingCircle}
+							onclick={createCircle}
 						>
-							{#if sharing}
+							{#if creatingCircle}
 								<span class="loading loading-spinner loading-sm"></span>
-								Sharing...
+								Creating...
 							{:else}
-								Share to Circle 🎉
+								Create & Share 🎉
 							{/if}
 						</button>
 					</div>
@@ -217,6 +267,7 @@
 		justify-content: center;
 		z-index: 1000;
 		padding: 1rem;
+		padding-bottom: env(safe-area-inset-bottom, 1rem);
 	}
 
 	.modal-content {
@@ -225,6 +276,9 @@
 		padding: 1.5rem;
 		width: 100%;
 		max-width: 420px;
+		max-height: 90vh;
+		max-height: 90dvh;
+		overflow-y: auto;
 		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 	}
 
@@ -288,5 +342,24 @@
 		color: #9ca3af;
 		text-align: center;
 		padding: 1rem;
+	}
+
+	@media (max-width: 480px) {
+		.modal-content {
+			padding: 1rem;
+			border-radius: 12px;
+			max-height: 85vh;
+			max-height: 85dvh;
+		}
+
+		.toggle-row {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.5rem;
+		}
+
+		.link-row {
+			flex-direction: column;
+		}
 	}
 </style>

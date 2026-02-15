@@ -2,13 +2,13 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { requireAuth } from '$lib/server/auth/guards';
 import { getDb } from '$lib/server/db';
-import { sharedItems, designs, dollProjects } from '$lib/server/db/schema';
+import { sharedItems, catalogs } from '$lib/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { requireCircleMembership, isCircleOwner } from '$lib/utils/circle-permissions';
 
 /**
  * GET /api/circles/[id]/items
- * Get all shared items in a circle with hydrated design/doll data
+ * Get all shared items in a circle with hydrated design/doll/catalog data
  */
 export const GET: RequestHandler = async ({ params, locals }) => {
 	const user = requireAuth(locals);
@@ -38,30 +38,23 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			orderBy: [desc(sharedItems.createdAt)]
 		});
 
-		// Hydrate design/doll data manually (no FK in schema)
+		// Hydrate catalog data (only catalogs are shared to circles)
 		const hydrated = await Promise.all(
 			items.map(async (item) => {
-				if (item.itemType === 'design') {
-					const design = await db.query.designs.findFirst({
-						where: eq(designs.id, item.itemId)
+				// Only handle catalogs - older design/dollProject shares are ignored
+				if (item.itemType === 'catalog') {
+					const catalog = await db.query.catalogs.findFirst({
+						where: eq(catalogs.id, item.itemId)
 					});
-					return { ...item, design, dollProject: null };
-				} else {
-					// dollProject
-					const dollProject = await db.query.dollProjects.findFirst({
-						where: eq(dollProjects.id, item.itemId),
-						with: {
-							design: true,
-							dollTemplate: true
-						}
-					});
-					return { ...item, dollProject, design: null };
+					return { ...item, catalog, design: null, dollProject: null };
 				}
+				// Skip non-catalog items
+				return null;
 			})
 		);
 
-		// Filter out items where the source was deleted
-		const validItems = hydrated.filter((item) => item.design || item.dollProject);
+		// Filter out nulls and deleted catalogs
+		const validItems = hydrated.filter((item): item is NonNullable<typeof item> => item !== null && item.catalog !== null);
 
 		// Add reaction counts for each item
 		const itemsWithCounts = validItems.map((item) => {

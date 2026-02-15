@@ -101,9 +101,8 @@
 						disabled={loading}
 						autocomplete="current-password"
 					/>
-					<!-- Forgot Password (V2 Feature) -->
 					<label class="label">
-						<span class="label-text-alt text-gray-500">Forgot password? Ask a grown-up for help 👨‍👩‍👧</span>
+						<a href="/auth/reset" class="label-text-alt link link-primary">Forgot password? Reset it here 🔐</a>
 					</label>
 				</div>
 

@@ -74,55 +74,18 @@
 			</div>
 		</div>
 
-		<!-- Step 3 Card - Paper Doll -->
+		<!-- Step 3 Card - Print & Play -->
 		<div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow">
 			<figure class="px-10 pt-10">
 				<div
 					class="w-24 h-24 bg-gradient-to-br from-accent to-success rounded-full flex items-center justify-center text-5xl"
 				>
-					👗
-				</div>
-			</figure>
-			<div class="card-body items-center text-center">
-				<h2 class="card-title text-xl text-accent">3. Paper Doll</h2>
-				<p class="text-gray-600 text-sm">Put it on a paper doll!</p>
-			</div>
-		</div>
-
-		<!-- Step 4 Card -->
-		<div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow">
-			<figure class="px-10 pt-10">
-				<div
-					class="w-24 h-24 bg-gradient-to-br from-success to-primary rounded-full flex items-center justify-center text-5xl"
-				>
 					🖨️
 				</div>
 			</figure>
 			<div class="card-body items-center text-center">
-				<h2 class="card-title text-xl text-success">4. Print & Play!</h2>
+				<h2 class="card-title text-xl text-accent">3. Print & Play!</h2>
 				<p class="text-gray-600 text-sm">Cut, fold, and play!</p>
-			</div>
-		</div>
-	</div>
-
-	<!-- Paper Dolls Feature -->
-	<div class="card bg-white shadow-xl p-8 mb-8">
-		<div class="flex flex-col md:flex-row items-center gap-6">
-			<div
-				class="w-20 h-20 bg-gradient-to-br from-pink-300 to-purple-300 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0"
-			>
-				👗
-			</div>
-			<div class="flex-1 text-center md:text-left">
-				<h2 class="text-2xl font-bold text-gray-800 mb-1">Paper Doll Maker</h2>
-				<p class="text-gray-600">
-					Turn your designs into printable paper dolls! Choose from 6 different body types and poses, then print and play!
-				</p>
-			</div>
-			<div class="flex gap-3">
-				<a href="/doll-builder" class="btn btn-accent">
-					Browse Templates
-				</a>
 			</div>
 		</div>
 	</div>
