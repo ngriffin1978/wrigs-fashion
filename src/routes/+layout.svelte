@@ -43,6 +43,11 @@
 	}
 </script>
 
+<!-- Skip Link for Accessibility -->
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-black focus:rounded-lg focus:font-bold">
+	Skip to main content
+</a>
+
 <!-- Under Construction Banner -->
 <div class="bg-gradient-to-r from-yellow-200 via-orange-200 to-pink-200 text-center py-2 px-4 text-sm font-semibold animate-pulse">
 	🚧 We're making improvements! Some things may look different. Thanks for your patience! 🚧
@@ -149,7 +154,7 @@
 {/if}
 
 <!-- Main Content -->
-<div class="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-yellow-100 pb-20 lg:pb-0">
+<div id="main-content" class="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-yellow-100 pb-20 lg:pb-0">
 	<slot />
 </div>
 

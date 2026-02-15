@@ -3,6 +3,28 @@
 	import { goto } from '$app/navigation';
 	import AddToCatalogModal from '$lib/components/catalog/AddToCatalogModal.svelte';
 
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+		
+		const key = e.key.toLowerCase();
+		
+		if ((e.ctrlKey || e.metaKey) && key === 's') {
+			e.preventDefault();
+			saveImage();
+			return;
+		}
+		
+		if (key === 'b') tool = 'brush';
+		else if (key === 'e') tool = 'eraser';
+		else if (key === 's' && !e.ctrlKey && !e.metaKey) tool = 'spray';
+		else if (key === 'g') tool = 'glitter';
+		else if (key === 't') tool = 'stamp';
+		else if (key === 'w') tool = 'wand';
+		
+		if (key === '[') brushSize = Math.max(2, brushSize - 2);
+		if (key === ']') brushSize = Math.min(50, brushSize + 2);
+	}
+
 	interface Props {
 		data: {
 			user: {
@@ -451,6 +473,8 @@
 	];
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 <svelte:head>
 	<title>Color Your Design - Wrigs Fashion</title>
 </svelte:head>
@@ -519,6 +543,8 @@
 							class:btn-primary={tool === 'brush'}
 							class:btn-outline={tool !== 'brush'}
 							onclick={() => (tool = 'brush')}
+							aria-label="Brush tool (press B)"
+							aria-pressed={tool === 'brush'}
 						>
 							🖌️ Brush
 						</button>
@@ -527,6 +553,8 @@
 							class:btn-primary={tool === 'spray'}
 							class:btn-outline={tool !== 'spray'}
 							onclick={() => (tool = 'spray')}
+							aria-label="Spray tool (press S)"
+							aria-pressed={tool === 'spray'}
 						>
 							💨 Spray
 						</button>
@@ -535,6 +563,8 @@
 							class:btn-primary={tool === 'glitter'}
 							class:btn-outline={tool !== 'glitter'}
 							onclick={() => (tool = 'glitter')}
+							aria-label="Glitter tool (press G)"
+							aria-pressed={tool === 'glitter'}
 						>
 							✨ Glitter
 						</button>
@@ -543,6 +573,8 @@
 							class:btn-primary={tool === 'stamp'}
 							class:btn-outline={tool !== 'stamp'}
 							onclick={() => (tool = 'stamp')}
+							aria-label="Stamp tool (press T)"
+							aria-pressed={tool === 'stamp'}
 						>
 							🎨 Stamp
 						</button>
@@ -551,6 +583,8 @@
 							class:btn-primary={tool === 'wand'}
 							class:btn-outline={tool !== 'wand'}
 							onclick={() => (tool = 'wand')}
+							aria-label="Magic Wand tool (press W)"
+							aria-pressed={tool === 'wand'}
 							title="Click a color to remove it"
 						>
 							🪄 Wand
@@ -560,6 +594,8 @@
 							class:btn-primary={tool === 'eraser'}
 							class:btn-outline={tool !== 'eraser'}
 							onclick={() => (tool = 'eraser')}
+							aria-label="Eraser tool (press E)"
+							aria-pressed={tool === 'eraser'}
 						>
 							🧹 Eraser
 						</button>
