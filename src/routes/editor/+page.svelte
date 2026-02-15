@@ -74,9 +74,11 @@
 		img.src = url;
 	}
 
-	function startDrawing(e: MouseEvent) {
+	function startDrawing(e: MouseEvent | PointerEvent) {
 		if (!ctx || !canvas) return;
 
+		(e.target as HTMLElement).setPointerCapture(e.pointerId);
+		
 		const rect = canvas.getBoundingClientRect();
 		const x = (e.clientX - rect.left) * (canvas.width / rect.width);
 		const y = (e.clientY - rect.top) * (canvas.height / rect.height);
@@ -92,7 +94,7 @@
 		ctx.moveTo(x, y);
 	}
 
-	function draw(e: MouseEvent) {
+	function draw(e: MouseEvent | PointerEvent) {
 		if (!isDrawing || !ctx || !canvas) return;
 
 		const rect = canvas.getBoundingClientRect();
@@ -680,13 +682,13 @@
 					{#if imageUrl}
 						<canvas
 							bind:this={canvas}
-							class="max-w-full h-auto border-2 border-gray-200 rounded-lg"
+							class="max-w-full h-auto border-2 border-gray-200 rounded-lg touch-none"
 							class:cursor-crosshair={tool !== 'wand'}
 							class:cursor-pointer={tool === 'wand'}
-							onmousedown={startDrawing}
-							onmousemove={draw}
-							onmouseup={stopDrawing}
-							onmouseleave={stopDrawing}
+							onpointerdown={startDrawing}
+							onpointermove={draw}
+							onpointerup={stopDrawing}
+							onpointerleave={stopDrawing}
 						/>
 					{:else}
 						<div class="text-center py-20">

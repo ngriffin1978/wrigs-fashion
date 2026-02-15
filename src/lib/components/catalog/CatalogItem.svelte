@@ -246,27 +246,38 @@
 
 	.resize-handle {
 		position: absolute;
-		width: 14px;
-		height: 14px;
+		width: 44px;
+		height: 44px;
 		background: white;
 		border: 2px solid #a855f7;
 		border-radius: 50%;
 		z-index: 10;
 		touch-action: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	.resize-handle.top-left { top: -7px; left: -7px; cursor: nwse-resize; }
-	.resize-handle.top-right { top: -7px; right: -7px; cursor: nesw-resize; }
-	.resize-handle.bottom-left { bottom: -7px; left: -7px; cursor: nesw-resize; }
-	.resize-handle.bottom-right { bottom: -7px; right: -7px; cursor: nwse-resize; }
+	.resize-handle::after {
+		content: '';
+		width: 14px;
+		height: 14px;
+		background: #a855f7;
+		border-radius: 50%;
+	}
+
+	.resize-handle.top-left { top: -22px; left: -22px; cursor: nwse-resize; }
+	.resize-handle.top-right { top: -22px; right: -22px; cursor: nesw-resize; }
+	.resize-handle.bottom-left { bottom: -22px; left: -22px; cursor: nesw-resize; }
+	.resize-handle.bottom-right { bottom: -22px; right: -22px; cursor: nwse-resize; }
 
 	.rotate-handle {
 		position: absolute;
-		top: -36px;
+		top: -56px;
 		left: 50%;
 		transform: translateX(-50%);
-		width: 28px;
-		height: 28px;
+		width: 44px;
+		height: 44px;
 		background: white;
 		border: 2px solid #a855f7;
 		border-radius: 50%;
@@ -275,6 +286,7 @@
 		align-items: center;
 		justify-content: center;
 		color: #a855f7;
+		font-size: 20px;
 		z-index: 10;
 		touch-action: none;
 	}
@@ -282,20 +294,20 @@
 	.rotate-handle::before {
 		content: '';
 		position: absolute;
-		bottom: -10px;
+		bottom: -14px;
 		left: 50%;
 		transform: translateX(-50%);
 		width: 2px;
-		height: 10px;
+		height: 14px;
 		background: #a855f7;
 	}
 
 	.delete-btn {
 		position: absolute;
-		top: -10px;
-		right: -10px;
-		width: 26px;
-		height: 26px;
+		top: -16px;
+		right: -16px;
+		width: 44px;
+		height: 44px;
 		background: #f87171;
 		border: 2px solid white;
 		border-radius: 50%;
@@ -304,6 +316,7 @@
 		align-items: center;
 		justify-content: center;
 		color: white;
+		font-size: 20px;
 		z-index: 10;
 		padding: 0;
 	}

@@ -143,8 +143,9 @@
 		}
 	}
 
-	function startDrawingSelection(e: MouseEvent) {
+	function startDrawingSelection(e: MouseEvent | PointerEvent) {
 		if (!cropCanvas) return;
+		(e.target as HTMLElement).setPointerCapture(e.pointerId);
 		isDrawingSelection = true;
 		selectionPath = [];
 
@@ -156,7 +157,7 @@
 		drawCropCanvas();
 	}
 
-	function continueDrawingSelection(e: MouseEvent) {
+	function continueDrawingSelection(e: MouseEvent | PointerEvent) {
 		if (!isDrawingSelection || !cropCanvas) return;
 
 		const rect = cropCanvas.getBoundingClientRect();
@@ -385,11 +386,11 @@
 								<div class="flex justify-center">
 									<canvas
 										bind:this={cropCanvas}
-										class="max-w-full h-auto border-2 border-gray-300 rounded-lg cursor-crosshair"
-										onmousedown={startDrawingSelection}
-										onmousemove={continueDrawingSelection}
-										onmouseup={stopDrawingSelection}
-										onmouseleave={stopDrawingSelection}
+										class="max-w-full h-auto border-2 border-gray-300 rounded-lg cursor-crosshair touch-none"
+										onpointerdown={startDrawingSelection}
+										onpointermove={continueDrawingSelection}
+										onpointerup={stopDrawingSelection}
+										onpointerleave={stopDrawingSelection}
 									/>
 								</div>
 
