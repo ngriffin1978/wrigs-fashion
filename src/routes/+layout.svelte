@@ -43,6 +43,11 @@
 	}
 </script>
 
+<!-- Under Construction Banner -->
+<div class="bg-gradient-to-r from-yellow-200 via-orange-200 to-pink-200 text-center py-2 px-4 text-sm font-semibold animate-pulse">
+	🚧 We're making improvements! Some things may look different. Thanks for your patience! 🚧
+</div>
+
 <!-- Navigation -->
 <nav class="navbar bg-white shadow-lg mb-4 lg:mb-8">
 	<div class="navbar-start">
