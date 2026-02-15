@@ -25,6 +25,13 @@
 		if (key === ']') brushSize = Math.min(50, brushSize + 2);
 	}
 
+	function handleWheel(e: WheelEvent) {
+		if (e.ctrlKey || e.metaKey) {
+			e.preventDefault();
+			brushSize = Math.max(2, Math.min(50, brushSize - Math.sign(e.deltaY) * 2));
+		}
+	}
+
 	interface Props {
 		data: {
 			user: {
@@ -725,6 +732,7 @@
 							onpointermove={draw}
 							onpointerup={stopDrawing}
 							onpointerleave={stopDrawing}
+							onwheel={handleWheel}
 						/>
 					{:else}
 						<div class="text-center py-20">

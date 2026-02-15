@@ -72,9 +72,10 @@
 | Touch Support | ✅ FIXED | Editor + crop now work on touch |
 | Touch Targets | ✅ FIXED | All handles now 44px+ |
 | Keyboard Shortcuts | ✅ FIXED | B,E,S,G,T,W + Ctrl+S |
+| Mouse Wheel Zoom | ✅ FIXED | Ctrl+wheel adjusts brush size |
 | ARIA Labels | ✅ FIXED | Tool buttons have labels |
 | Skip Link | ✅ FIXED | Added to layout |
-| Focus States | ❌ PENDING | Missing focus-visible CSS |
+| Focus States | ✅ FIXED | Added :focus-visible CSS |
 | Hover States | ❌ PENDING | Inconsistent across pages |
 | Theme Colors | ❌ PENDING | Hardcoded instead of tokens |
 | Modals | ❌ PENDING | Two different implementations |
