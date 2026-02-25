@@ -171,6 +171,12 @@
 
 		// Keyboard shortcuts
 		const handleKeyPress = (e: KeyboardEvent) => {
+			// Don't intercept keystrokes when user is typing in an input field
+			const target = e.target as HTMLElement;
+			if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+				return;
+			}
+
 			if (e.key === ' ' && !isOpen) {
 				e.preventDefault();
 				toggleAutoCycle();
