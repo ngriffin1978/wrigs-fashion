@@ -16,9 +16,15 @@
 	let error = $state('');
 	let saveStatus = $state<'saved' | 'saving' | 'error'>('saved');
 	let shareModalOpen = $state(false);
+	let comments = $state<any[]>([]);
+	let commentsLoading = $state(false);
+	let commentsError = $state('');
+	let newComment = $state('');
+	let replyDrafts = $state<Record<string, string>>({});
 
 	onMount(async () => {
 		await loadCatalog();
+		await loadComments();
 	});
 
 	async function loadCatalog() {
@@ -110,6 +116,44 @@
 		isPublic = newPublic;
 		shareSlug = newSlug;
 	}
+
+	const rootComments = $derived(comments.filter((c) => !c.parentId));
+	const repliesFor = (parentId: string) => comments.filter((c) => c.parentId === parentId);
+
+	async function loadComments() {
+		commentsLoading = true;
+		commentsError = '';
+		try {
+			const res = await fetch(`/api/catalogs/${catalogId}/comments`);
+			const data = await res.json();
+			comments = data.comments || [];
+		} catch {
+			commentsError = 'Failed to load comments';
+		} finally {
+			commentsLoading = false;
+		}
+	}
+
+	async function submitComment(parentId: string | null = null) {
+		const draft = parentId ? (replyDrafts[parentId] || '') : newComment;
+		if (!draft.trim()) return;
+		try {
+			const res = await fetch(`/api/catalogs/${catalogId}/comments`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ message: draft, parentId })
+			});
+			if (!res.ok) return;
+			if (parentId) {
+				replyDrafts = { ...replyDrafts, [parentId]: '' };
+			} else {
+				newComment = '';
+			}
+			await loadComments();
+		} catch {
+			// no-op for now
+		}
+	}
 </script>
 
 <svelte:head>
@@ -154,5 +198,56 @@
 			onclose={() => { shareModalOpen = false; }}
 			ontoggle={handleShareToggle}
 		/>
+
+		<div class="card bg-white shadow-xl mt-6">
+			<div class="card-body">
+				<div class="flex items-center justify-between">
+					<h3 class="card-title">Catalog Discussion</h3>
+					<button class="btn btn-ghost btn-xs" onclick={loadComments}>Refresh</button>
+				</div>
+
+				<div class="space-y-2 mb-4">
+					<textarea class="textarea textarea-bordered w-full" rows="3" bind:value={newComment} placeholder="Share a thought about this catalog..."></textarea>
+					<div class="flex justify-end">
+						<button class="btn btn-primary btn-sm" onclick={() => submitComment(null)}>Post Comment</button>
+					</div>
+				</div>
+
+				{#if commentsLoading}
+					<div class="text-sm opacity-70">Loading comments...</div>
+				{:else if commentsError}
+					<div class="text-sm text-error">{commentsError}</div>
+				{:else if rootComments.length === 0}
+					<div class="text-sm opacity-70">No comments yet. Start the conversation.</div>
+				{:else}
+					<div class="space-y-4">
+						{#each rootComments as comment}
+							<div class="rounded-lg border border-base-300 p-3">
+								<div class="text-sm font-semibold">{comment.author}</div>
+								<div class="text-xs opacity-60">{new Date(comment.createdAt).toLocaleString()}</div>
+								<p class="mt-2 whitespace-pre-wrap">{comment.message}</p>
+
+								<div class="mt-3 ml-3 space-y-2">
+									{#each repliesFor(comment.id) as reply}
+										<div class="rounded border border-base-200 p-2 bg-base-100">
+											<div class="text-xs font-semibold">{reply.author}</div>
+											<div class="text-[10px] opacity-60">{new Date(reply.createdAt).toLocaleString()}</div>
+											<p class="text-sm mt-1 whitespace-pre-wrap">{reply.message}</p>
+										</div>
+									{/each}
+								</div>
+
+								<div class="mt-3">
+									<textarea class="textarea textarea-bordered w-full textarea-sm" rows="2" bind:value={replyDrafts[comment.id]} placeholder="Write a reply..."></textarea>
+									<div class="flex justify-end mt-1">
+										<button class="btn btn-ghost btn-xs" onclick={() => submitComment(comment.id)}>Reply</button>
+									</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+		</div>
 	{/if}
 </div>
