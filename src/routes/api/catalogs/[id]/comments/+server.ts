@@ -5,20 +5,28 @@ import { getSessionId } from '$lib/server/session';
 import { optionalAuth } from '$lib/server/auth/guards';
 import { eq } from 'drizzle-orm';
 import { addCatalogComment, listCatalogComments } from '$lib/server/catalog-comments-store';
+import { getFallbackCatalog } from '$lib/server/catalogs-fallback-store';
 
 async function verifyCatalogAccess(paramsId: string, cookies: any, locals: any) {
   const user = optionalAuth(locals);
   const sessionId = getSessionId(cookies);
-  const db = getDb();
-  const [catalog] = await db.select().from(catalogs).where(eq(catalogs.id, paramsId));
-  if (!catalog) throw error(404, 'Catalog not found');
 
-  const userIdMatch = user && catalog.userId === user.id;
-  const sessionIdMatch = catalog.sessionId === sessionId;
-  const isOwner = userIdMatch || sessionIdMatch;
-  if (!isOwner && !catalog.isPublic) throw error(404, 'Catalog not found');
+  try {
+    const db = getDb();
+    const [catalog] = await db.select().from(catalogs).where(eq(catalogs.id, paramsId));
+    if (!catalog) throw error(404, 'Catalog not found');
 
-  return { catalog, user };
+    const userIdMatch = user && catalog.userId === user.id;
+    const sessionIdMatch = catalog.sessionId === sessionId;
+    const isOwner = userIdMatch || sessionIdMatch;
+    if (!isOwner && !catalog.isPublic) throw error(404, 'Catalog not found');
+
+    return { catalog, user };
+  } catch {
+    const fallback = getFallbackCatalog(paramsId, { sessionId, userId: user?.id || null });
+    if (!fallback) throw error(404, 'Catalog not found');
+    return { catalog: fallback, user };
+  }
 }
 
 export const GET: RequestHandler = async ({ params, cookies, locals }) => {

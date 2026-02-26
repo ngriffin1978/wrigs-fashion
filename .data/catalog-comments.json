@@ -1,0 +1,28 @@
+{
+  "comments": [
+    {
+      "id": "Q645xH8n9rot",
+      "catalogId": "lcBjgktdL0i0",
+      "parentId": null,
+      "author": "Anonymous",
+      "message": "Demo comment: this catalog now supports threaded discussion.",
+      "createdAt": "2026-02-26T02:42:47.881Z"
+    },
+    {
+      "id": "eNyYixYVUzC_",
+      "catalogId": "YtyFI7uILPqj",
+      "parentId": null,
+      "author": "Anonymous",
+      "message": "root",
+      "createdAt": "2026-02-26T02:43:15.513Z"
+    },
+    {
+      "id": "mrrmmNHAagD5",
+      "catalogId": "YtyFI7uILPqj",
+      "parentId": "eNyYixYVUzC_",
+      "author": "Anonymous",
+      "message": "reply",
+      "createdAt": "2026-02-26T02:43:15.527Z"
+    }
+  ]
+}

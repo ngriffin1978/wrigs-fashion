@@ -4,6 +4,7 @@ import { catalogs, catalogItems } from '$lib/server/db/schema';
 import { getSessionId } from '$lib/server/session';
 import { optionalAuth } from '$lib/server/auth/guards';
 import { eq, and, or } from 'drizzle-orm';
+import { getFallbackCatalog } from '$lib/server/catalogs-fallback-store';
 
 // GET /api/catalogs/:id — get catalog with items
 export const GET: RequestHandler = async ({ params, cookies, locals }) => {
@@ -17,45 +18,22 @@ export const GET: RequestHandler = async ({ params, cookies, locals }) => {
 		hasUser: !!user
 	});
 
-	const db = getDb();
-	// Fetch catalog without LATERAL joins (MySQL compatibility fix)
-	const [catalog] = await db.select().from(catalogs).where(eq(catalogs.id, params.id!));
+	try {
+		const db = getDb();
+		const [catalog] = await db.select().from(catalogs).where(eq(catalogs.id, params.id!));
+		if (!catalog) throw error(404, 'Catalog not found');
+		const items = await db.select().from(catalogItems).where(eq(catalogItems.catalogId, catalog.id));
 
-	if (!catalog) {
-		console.log('[GET /api/catalogs/:id] ❌ CATALOG NOT FOUND IN DB');
-		throw error(404, 'Catalog not found');
+		const userIdMatch = user && catalog.userId === user.id;
+		const sessionIdMatch = catalog.sessionId === sessionId;
+		const isOwner = userIdMatch || sessionIdMatch;
+		if (!isOwner && !catalog.isPublic) throw error(404, 'Catalog not found');
+		return json({ ...catalog, items });
+	} catch {
+		const fallback = getFallbackCatalog(params.id!, { sessionId, userId: user?.id || null });
+		if (!fallback) throw error(404, 'Catalog not found');
+		return json(fallback);
 	}
-
-	// Fetch items separately
-	const items = await db.select().from(catalogItems).where(eq(catalogItems.catalogId, catalog.id));
-
-	console.log('[GET /api/catalogs/:id] Catalog found in DB:', {
-		catalogId: catalog.id,
-		catalogSessionId: catalog.sessionId,
-		catalogUserId: catalog.userId,
-		isPublic: catalog.isPublic
-	});
-
-	// Allow access if owner (by userId OR sessionId) or public
-	const userIdMatch = user && catalog.userId === user.id;
-	const sessionIdMatch = catalog.sessionId === sessionId;
-	const isOwner = userIdMatch || sessionIdMatch;
-
-	console.log('[GET /api/catalogs/:id] Ownership check:', {
-		userIdMatch,
-		sessionIdMatch,
-		isOwner,
-		isPublic: catalog.isPublic,
-		willAllow: isOwner || catalog.isPublic
-	});
-
-	if (!isOwner && !catalog.isPublic) {
-		console.log('[GET /api/catalogs/:id] ❌ ACCESS DENIED - Not owner and not public');
-		throw error(404, 'Catalog not found');
-	}
-
-	console.log('[GET /api/catalogs/:id] ✅ Access granted');
-	return json({ ...catalog, items });
 };
 
 // PATCH /api/catalogs/:id — update catalog metadata
