@@ -90,15 +90,21 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		// Better Auth may set multiple cookies
 		const setCookies = signInResult.headers.get('set-cookie');
 		if (setCookies) {
-			// Parse all cookies from the header
-			const cookieStrings = setCookies.split(',').map((c: string) => c.trim());
-			
+			// Use getSetCookie() if available (Node 18+), otherwise split carefully.
+			// Cookie values can contain '=' (e.g. base64 session data), so we must
+			// split on the FIRST '=' only, not use split('=').length === 2.
+			const headers = signInResult.headers as Headers & { getSetCookie?: () => string[] };
+			const cookieStrings: string[] = typeof headers.getSetCookie === 'function'
+				? headers.getSetCookie()
+				: setCookies.split(/,\s*(?=[a-zA-Z_-]+=)/);
+
 			for (const cookieString of cookieStrings) {
-				const cookieParts = cookieString.split(';')[0].split('=');
-				if (cookieParts.length === 2) {
-					const cookieName = cookieParts[0].trim();
-					const cookieValue = decodeURIComponent(cookieParts[1].trim());
-					
+				const nameValuePart = cookieString.split(';')[0];
+				const equalsIndex = nameValuePart.indexOf('=');
+				if (equalsIndex > 0) {
+					const cookieName = nameValuePart.substring(0, equalsIndex).trim();
+					const cookieValue = decodeURIComponent(nameValuePart.substring(equalsIndex + 1).trim());
+
 					cookies.set(cookieName, cookieValue, {
 						path: '/',
 						httpOnly: true,

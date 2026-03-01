@@ -207,29 +207,6 @@
 					{/if}
 				</div>
 
-				<!-- Nickname Field -->
-				<div class="form-control mb-6">
-					<label class="label" for="nickname">
-						<span class="label-text font-semibold">🎨 Nickname</span>
-					</label>
-					<input
-						type="text"
-						id="nickname"
-						name="nickname"
-						bind:value={nickname}
-						class="input input-bordered w-full"
-						class:input-error={errors.nickname}
-						placeholder="What should we call you?"
-						disabled={loading}
-						maxlength="20"
-					/>
-					{#if errors.nickname}
-						<label class="label">
-							<span class="label-text-alt text-error">{errors.nickname}</span>
-						</label>
-					{/if}
-				</div>
-
 				<!-- General Error -->
 				{#if errors.general}
 					<div class="alert alert-error mb-4">
