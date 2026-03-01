@@ -57,6 +57,15 @@
 		loading = false;
 	}
 
+	async function handleDeleteItem(id: string) {
+		items = items.filter((i) => i.id !== id);
+		try {
+			await fetch(`/api/catalogs/${catalogId}/items/${id}`, { method: 'DELETE' });
+		} catch {
+			// deletion already reflected in UI; silently ignore network errors
+		}
+	}
+
 	async function handleItemsChange(updatedItems: CatalogItemData[]) {
 		saveStatus = 'saving';
 		try {
@@ -187,6 +196,7 @@
 		<CatalogCanvas
 			{items}
 			{backgroundColor}
+			ondeleteitem={handleDeleteItem}
 			onitemschange={handleItemsChange}
 		/>
 

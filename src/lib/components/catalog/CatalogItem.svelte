@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
+
 	export type CatalogItemData = {
 		id: string;
 		imageUrl: string;
@@ -34,6 +36,16 @@
 	let startPos = { x: 0, y: 0 };
 	let startAngle = 0;
 	let startRotation = 0;
+
+	// Clean up any lingering window listeners if the component is destroyed mid-interaction
+	onDestroy(() => {
+		window.removeEventListener('pointermove', onDragMove);
+		window.removeEventListener('pointerup', onDragEnd);
+		window.removeEventListener('pointermove', onResizeMove);
+		window.removeEventListener('pointerup', onResizeEnd);
+		window.removeEventListener('pointermove', onRotateMove);
+		window.removeEventListener('pointerup', onRotateEnd);
+	});
 
 	function getCenterPoint() {
 		return {

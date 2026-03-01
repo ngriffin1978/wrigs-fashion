@@ -5,12 +5,14 @@
 		items = [],
 		readonly = false,
 		backgroundColor = '#ffffff',
-		onitemschange
+		onitemschange,
+		ondeleteitem
 	}: {
 		items?: CatalogItemData[];
 		readonly?: boolean;
 		backgroundColor?: string;
 		onitemschange?: (items: CatalogItemData[]) => void;
+		ondeleteitem?: (id: string) => void;
 	} = $props();
 
 	let selectedId = $state<string | null>(null);
@@ -49,6 +51,7 @@
 	function deleteItem(id: string) {
 		items = items.filter((i) => i.id !== id);
 		selectedId = null;
+		ondeleteitem?.(id);
 		onitemschange?.(items);
 	}
 
